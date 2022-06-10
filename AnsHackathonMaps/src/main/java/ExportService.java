@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.*;
 
 import ConvexHull.Point3d;
+import ConvexHull.Point3dFixed;
 import ConvexHull.ConvexHull3D;
 import Octree.AABB;
 import Octree.Cube3d;
@@ -44,6 +45,8 @@ public class ExportService extends Service<Void> {
     private long pointsExportCount;
 
     private List<Point3d> points3dList;
+    private List<Point3d> points3dList_v2;
+    private Map<String, String> dictionary;
     private List<Cube3d> cube3dList;
     private List<Cube3d> cube3dListNew;
     //    private List<Cube3d> cube3dListLocalTemp;
@@ -144,11 +147,15 @@ public class ExportService extends Service<Void> {
                 );
 
                 points3dList = new ArrayList<Point3d>();
+                points3dList_v2 = new ArrayList<Point3d>();
+                dictionary  = new HashMap<String, String>();
                 counter = 0;
                 currentState = true;
 
                 // ilosc operacji do progressu
                 max = pointsCount;
+                double minX = 0, minY = 0, minZ = 0;
+                boolean isMin = false;
 
                 try {
 
@@ -159,7 +166,7 @@ public class ExportService extends Service<Void> {
 
                         Platform.runLater(
                                 () -> {
-                                    setCurrentWork("1 z 4: Dekodowanie plikow...");
+                                    setCurrentWork("1 z 5: Dekodowanie plikow...");
                                 }
                         );
 
@@ -170,7 +177,6 @@ public class ExportService extends Service<Void> {
                             if (!currentState) return null;
 
                             try {
-
 
                                 String[] pointArray = new String[10];
                                 pointArray = row.split(",");
@@ -183,6 +189,16 @@ public class ExportService extends Service<Void> {
                                 point3d.g = Integer.parseInt(pointArray[4]);    // Green
                                 point3d.b = Integer.parseInt(pointArray[5]);    // Blue
                                 point3d.c = Double.parseDouble(pointArray[9]);  // classification
+                                if(!isMin){
+                                    minX = point3d.x;
+                                    minY = point3d.y;
+                                    minZ = point3d.z;
+                                    isMin = true;
+                                }
+                                minX = Math.min(minX, point3d.x);
+                                minY = Math.min(minY, point3d.y);
+                                minZ = Math.min(minZ, point3d.z);
+
                                 points3dList.add(point3d);
 
                             } catch (Exception e) {
@@ -200,49 +216,62 @@ public class ExportService extends Service<Void> {
                     e.printStackTrace();
                 }
 
+                try {
+                    Platform.runLater(
+                            () -> {
+                                setCurrentWork("2 z 5: Normalizacja danych. ");
+                            }
+                    );
 
+                    for(int i = 0; i < points3dList.size(); i++)
+                    {
+                        points3dList.get(i).x = points3dList.get(i).x - minX;
+                        points3dList.get(i).y = points3dList.get(i).y - minY;
+                        points3dList.get(i).z = points3dList.get(i).z - minZ;
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("2 z 4: zadanie skalowanie x-y");
+                                setCurrentWork("3 z 5: Sortowanie danych. ");
                             }
                     );
 
-                    /// zadanie
+                    Collections.sort(points3dList, new Sortbyroll());
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    Platform.runLater(
+                            () -> {
+                                setCurrentWork("4 z 5: Grupowanie danych. ");
+                            }
+                    );
+                    Point3d point = new Point3d(points3dList.get(0));
+                    for(int i = 1; i < points3dList.size(); i++){
+                        Point3d point2 = new Point3d(points3dList.get(i));
+
+                        if(point.x != point2.x) points3dList_v2.add(point);
+                        else if(point.y != point2.y ) points3dList_v2.add(point);
+                        else if (point.z != point2.z) points3dList_v2.add(point);
+                        else point = point2;
+                    }
 
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("3 z 4: zadanie ...");
-                            }
-                    );
-
-                    //zadanie
-
-
-
-
-
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-
-
-
-
-                try {
-                    Platform.runLater(
-                            () -> {
-                                setCurrentWork("4 z 4: rozklad chmury do mapy...");
+                                setCurrentWork("5 z 5: rozklad chmury do mapy...");
                             }
                     );
 
@@ -259,7 +288,7 @@ public class ExportService extends Service<Void> {
                     // Create a huge structure of glass that has an area of 100x100 blocks and is 50 blocks height.
                     // On top of the glass structure we have a layer of grass.
                     level.setSpawnPoint(50, 20 + 1, 50);
-                    for (int x = 0; x < 400; x++) {
+                    /* for (int x = 0; x < 400; x++) {
                         for (int z = 0; z < 400; z++) {
                             // Set glass
                             for (int y = -63; y < -43; y++) {
@@ -268,12 +297,11 @@ public class ExportService extends Service<Void> {
                             // Set grass
                             world.setBlock(x, -43, z, SimpleBlock.GLASS_PANE);
                         }
+                    } */
+                    for (int i = 0; i < points3dList_v2.size(); i++) {
+                        Point3dFixed point = points3dList_v2.get(i);
+                        world.setBlock((int) point.x, (int) point.y, (int) point.z, SimpleBlock.GRASS);
                     }
-
-                    // przykład tworzenia drzwi
-                        world.setBlock(50, 21, 50, DoorBlock.makeLower(DoorBlock.DoorMaterial.OAK, Facing4State.EAST, false));
-                        world.setBlock(50, 22, 50, DoorBlock.makeUpper(DoorBlock.DoorMaterial.OAK, DoorBlock.HingeSide.LEFT));
-
                     //  save the world
                     world.save();
 
@@ -294,6 +322,23 @@ public class ExportService extends Service<Void> {
         };
     }
 
+    class Sortbyroll implements Comparator<Point3d>
+    {
+        // Used for sorting in ascending order of
+        // roll number
+        public int compare(Point3d a, Point3d b)
+        {
+            int aX, bX, aY, bY;
+            aX = (int) a.x;
+            bX = (int) b.x;
+            aY = (int) a.y;
+            bY = (int) b.y;
+
+            if(aX != bX) return (int) (a.x - b.x);
+            else if(aY != bY) return (int) (a.y - b.y);
+            else return (int) (a.z - b.z);
+        }
+    }
 
     public Boolean getCurrentState() {
         return currentState;
