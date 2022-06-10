@@ -205,7 +205,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("2 z 4: zadanie");
+                                setCurrentWork("2 z 4: zadanie skalowanie x-y");
                             }
                     );
 
@@ -249,7 +249,7 @@ public class ExportService extends Service<Void> {
 
 
                     DefaultLayers layers = new DefaultLayers();
-                    layers.setLayer(0, Material.BEDROCK);
+                    layers.setLayer(-64, Material.BEDROCK);
                     IGenerator generator = new FlatGenerator(layers);
                     Level level = new Level("HackathonMap", generator);
                     level.setGameType(GameType.CREATIVE);
@@ -262,11 +262,11 @@ public class ExportService extends Service<Void> {
                     for (int x = 0; x < 400; x++) {
                         for (int z = 0; z < 400; z++) {
                             // Set glass
-                            for (int y = 0; y < 20; y++) {
+                            for (int y = -63; y < -43; y++) {
                                 world.setBlock(x, y, z, SimpleBlock.GLASS);
                             }
                             // Set grass
-                            world.setBlock(x, 20, z, SimpleBlock.GLASS_PANE);
+                            world.setBlock(x, -43, z, SimpleBlock.GLASS_PANE);
                         }
                     }
 
