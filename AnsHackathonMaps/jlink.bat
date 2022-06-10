@@ -1,0 +1,2 @@
+"C:\Program Files\Java\jdk-9.0.4\bin\jlink" --no-header-files --no-man-pages --compress=2 --strip-debug --module-path "C:\Program Files\Java\jdk-9.0.4\jmods" --add-modules  java.base,java.datatransfer,java.desktop,java.logging,java.naming,java.xml,javafx.base,javafx.controls,javafx.fxml,javafx.graphics,javafx.swing,jdk.unsupported  --output "D:\PROJECTS\AnsHackathonMaps\build\launch4j\jre"
+pause
