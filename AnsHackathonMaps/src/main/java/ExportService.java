@@ -15,10 +15,8 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
-import net.morbz.minecraft.blocks.DoorBlock;
 import net.morbz.minecraft.blocks.Material;
 import net.morbz.minecraft.blocks.SimpleBlock;
-import net.morbz.minecraft.blocks.states.Facing4State;
 import net.morbz.minecraft.level.FlatGenerator;
 import net.morbz.minecraft.level.GameType;
 import net.morbz.minecraft.level.IGenerator;
@@ -256,21 +254,13 @@ public class ExportService extends Service<Void> {
 
                     // Create a huge structure of glass that has an area of 100x100 blocks and is 50 blocks height.
                     // On top of the glass structure we have a layer of grass.
-                    level.setSpawnPoint(50, 20 + 1, 50);
-                    for (int x = 0; x < 400; x++) {
-                        for (int z = 0; z < 400; z++) {
-                            // Set glass
-                            for (int y = -63; y < -43; y++) {
-                                world.setBlock(x, y, z, SimpleBlock.LOG);
-                            }
-                            // Set grass
-                            world.setBlock(x, -43, z, SimpleBlock.GLASS_PANE);
-                        }
+                    Point3d SpawnPoint = points3dList.get(1);
+
+                    level.setSpawnPoint((int)SpawnPoint.x,(int)SpawnPoint.z+ 1, (int)SpawnPoint.y);
+                    for (int i = 0 ; i < points3dList.size();i++) {
+                        GenBlocks(points3dList.get(i),world);
                     }
 
-                    // przykład tworzenia drzwi
-                        world.setBlock(50, 21, 50, DoorBlock.makeLower(DoorBlock.DoorMaterial.OAK, Facing4State.EAST, false));
-                        world.setBlock(50, 22, 50, DoorBlock.makeUpper(DoorBlock.DoorMaterial.OAK, DoorBlock.HingeSide.LEFT));
 
                     //  save the world
                     world.save();
@@ -346,4 +336,22 @@ public class ExportService extends Service<Void> {
     public void setMax(long max) {
         this.max = max;
     }
+
+
+    //klasa do generowania świata
+    public void GenBlocks(Point3d point,World world){
+        int x = (int)point.x;
+        int y = (int)point.y;
+        int z = (int)point.z;
+        int cat = (int)point.c;
+        switch (cat){
+            case 6:
+                world.setBlock(x, z, y, SimpleBlock.STONE);
+                break;
+            case 2:
+                world.setBlock(x,z,y,SimpleBlock.COAL_BLOCK);
+        }
+    }
 }
+
+

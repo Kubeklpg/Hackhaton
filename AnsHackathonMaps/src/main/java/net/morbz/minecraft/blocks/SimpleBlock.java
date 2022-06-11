@@ -63,6 +63,7 @@ public enum SimpleBlock implements IBlock {
 	REDSTONE_ORE(Material.REDSTONE_ORE),
 	LIT_REDSTONE_ORE(Material.LIT_REDSTONE_ORE),
 	ICE(Material.ICE),
+	STONE(Material.STONE),
 	SNOW(Material.SNOW),
 	CLAY(Material.CLAY),
 	FENCE(Material.FENCE),
