@@ -325,14 +325,16 @@ public class ExportService extends Service<Void> {
                         }
                     } */
                     double min=1000;
-                    for (int i = 0; i < 10000; i++) {
+
+                    int[][] arr = Indentity(points3dList);
+                    for (int i = 0; i < points3dList.size(); i++) {
                         Point3d point = points3dList_v2.get(i);
-                        int[][] arr = Indentity(points3dList);
                         GenBlocks(point,world,arr);
-                       //System.out.println(i);
+
                         if(point.z < min) min=point.z;
                         //world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
                     }
+                    System.out.println(arr[2][0] + " Min kategori 2 + "+arr[2][1]);
                    /*
                     for (int x = 0; x < 1000; x++) {
                         for (int z = 0; z < 1000; z++) {
@@ -445,26 +447,13 @@ public class ExportService extends Service<Void> {
         switch (cat){
 
             case 2:
-                int len = arr[2][1] - arr[2][0];
-                double diff = len/5;
+
+
+                int diff = arr[2][1]/2;
                 if(point.i > arr[2][0] && point.i < point.i + diff){
-                    world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
-                }
-                else if(point.i >= point.i + diff && point.i < point.i + 2*diff){
-                    world.setBlock(x,z,y*-1,SimpleBlock.DIRT);
-                }
-                else if(point.i >= point.i + 2*diff && point.i < point.i + 3*diff){
-                    world.setBlock(x,z,y*-1,SimpleBlock.STONE);
-                }
-                else if(point.i >= point.i + 3*diff && point.i < point.i + 4*diff){
                     world.setBlock(x,z,y*-1,SimpleBlock.COBBLESTONE);
-                }
-                else if(point.i >= point.i + 4*diff && point.i < point.i + 5*diff){
-                    world.setBlock(x,z,y*-1,SimpleBlock.OBSIDIAN);
-                }
-                else if(point.i >= point.i + 5*diff && point.i < point.i + arr[2][1]){
-                world.setBlock(x,z,y*-1,SimpleBlock.COAL_BLOCK);
                 }else world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
+
 
                 break;
             case 3:
@@ -494,7 +483,7 @@ public class ExportService extends Service<Void> {
     public int[][] Indentity(List<Point3d> points3dList){
         int[][] arr = new int[9][2];
         for(int i = 0 ; i < arr.length ; i ++){
-            arr[i][0]=0;
+            arr[i][0]=1000000;
             arr[i][1]=0;
         }
         for(int i = 0 ; i < points3dList.size();i++) {
@@ -502,9 +491,13 @@ public class ExportService extends Service<Void> {
             if(point.c == 2.0){
                 arr[2][0] = Math.min(arr[2][0],(int)point.i);
                 arr[2][1] = Math.max(arr[2][0],(int)point.i);
+                double leng = arr[2][1]-arr[2][0];
+                arr[2][1]= (int)leng;
             } else if (point.c == 6.0) {
                 arr[6][0] = Math.min(arr[6][0],(int)point.i);
                 arr[6][1] = Math.max(arr[6][0],(int)point.i);
+                double leng = arr[6][1]-arr[6][0];
+                arr[6][1]= (int)leng;
             }
 
         }
