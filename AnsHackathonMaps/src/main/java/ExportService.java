@@ -27,6 +27,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import net.morbz.minecraft.blocks.DoorBlock;
 import net.morbz.minecraft.blocks.Material;
+import net.morbz.minecraft.blocks.SandBlock;
 import net.morbz.minecraft.blocks.SimpleBlock;
 import net.morbz.minecraft.blocks.states.Facing4State;
 import net.morbz.minecraft.level.FlatGenerator;
@@ -226,7 +227,6 @@ public class ExportService extends Service<Void> {
                                 setCurrentWork("2 z 6: Normalizacja danych...");
                             }
                     );
-
                     for(int i = 0; i < points3dList.size(); i++)
                     {
                         points3dList.get(i).x = points3dList.get(i).x - minX;
@@ -292,7 +292,7 @@ public class ExportService extends Service<Void> {
                             }
                     );
                     Point3d point = points3dList.get(0);
-                    for(int i = 1; i < points3dList.size(); i++){
+                    for(int i = 0; i < points3dList.size(); i++){
                         Point3d point2 = points3dList.get(i);
                             if(point.x != point2.x) {
                                 points3dList_v2.add(point);
@@ -327,9 +327,10 @@ public class ExportService extends Service<Void> {
                     IGenerator generator = new FlatGenerator(layers);
                     Level level = new Level("HackathonMap", generator);
                     level.setGameType(GameType.CREATIVE);
+                    level.setAllowCommands(true);
                     level.setMapFeatures(false);
                     World world = new World(level, layers);
-                    level.setSpawnPoint(100, (int) (minZ+100.0), -400);
+                    level.setSpawnPoint(1000, (int) (minZ+100.0), -700);
 
                     double min=1000;
                     int[][] arr = Indentity(points3dList);
@@ -352,8 +353,10 @@ public class ExportService extends Service<Void> {
                     for(int i = 0; i < pointsOfGround.size(); i++){
                         Point3d point = pointsOfGround.get(i);
                         GenBlocks(point,world,arr);
+                    }for(int i = 0; i < pointOfBuilding.size(); i++){
+                        Point3d point = pointOfBuilding.get(i);
+                        GenBlocks(point,world,arr);
                     }
-
 
                     world.save();
 
@@ -449,30 +452,43 @@ public class ExportService extends Service<Void> {
 
                 int diff = arr[2][1]/4;
 
-                if(point.i > arr[2][0] && point.i < arr[2][0] + 1.85*diff) {
+                if(point.i > arr[2][0] && point.i < arr[2][0] + 1.83*diff) {
                     world.setBlock(x, z, y * -1, SimpleBlock.COBBLESTONE);
-                    for(int j = 0; j < 2; j++){
-                        world.setBlock(x, (int) z - 1 - j, y * -1, SimpleBlock.COBBLESTONE);
+
+                    for(int i = -1; i < 2; i ++) world.setBlock(x+i,z,i+y*-1,SimpleBlock.COBBLESTONE);
+                    for(int j = 0; j < 7; j++){
+                        world.setBlock(x, (int) z - j, y * -1, SimpleBlock.COBBLESTONE);
                     }
-                }else{
+                } else if(point.i > arr[2][0] && point.i < arr[2][0] + 1.86*diff) {
+                    world.setBlock(x, z, y * -1, SimpleBlock.GRAVEL);
+                    //world.setBlock(x, z, y * -1,SimpleBlock.SAND);
+                    for(int i = -1; i < 2; i ++) world.setBlock(x+i,z,i+y*-1,SimpleBlock.GRAVEL);/*world.setBlock(x+i,z,i+y*-1,SimpleBlock.SAND);*/
+                    for(int j = 0; j < 7; j++){
+                        world.setBlock(x, (int) z - j, y * -1, SimpleBlock.COBBLESTONE);
+                    }
+                } else{
                     world.setBlock(x, z, y * -1, SimpleBlock.GRASS);
                     world.setBlock(x, z-1, y * -1, SimpleBlock.GRASS);
-
+                    for(int i = -1; i < 2; i ++) world.setBlock(x+i,z,i+y*-1,SimpleBlock.GRASS);
+                    for(int j = 0; j < 7; j++){
+                        world.setBlock(x, (int) z - j, y * -1, SimpleBlock.GRASS);
+                    }
                 }
 
                 break;
             case 3:
-                world.setBlock(x,z,y*-1,SimpleBlock.SAPLING);
+                world.setBlock(x,z,y*-1,SimpleBlock.YELLOW_FLOWER);
                 world.setBlock(x,z-1,y*-1,SimpleBlock.DIRT);
                 break;
             case 4:
+                world.setBlock(x,z+1,y*-1,SimpleBlock.SLIME_BLOCK);
                 for(int i = 0; i < 10; i++){
                     world.setBlock(x,z-i,y*-1,SimpleBlock.LOG);
                 }
                 break;
             case 5:
-                world.setBlock(x,z,y*-1,SimpleBlock.LEAVES);
-                for(int i = -1; i < 2; i ++) world.setBlock(x+i,z+i,i+y*-1,SimpleBlock.LEAVES);
+                world.setBlock(x,z,y*-1,SimpleBlock.SLIME_BLOCK);
+                for(int i = -1; i < 2; i ++) world.setBlock(x+i,z+i,i+y*-1,SimpleBlock.SLIME_BLOCK);
                 break;
             case 6:
                 int differ = arr[6][1]/20;
