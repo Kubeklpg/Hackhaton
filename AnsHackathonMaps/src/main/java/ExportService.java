@@ -379,6 +379,7 @@ public class ExportService extends Service<Void> {
                                 Point3d point2 = pointsOfClass.get(j);
 
 
+
                                 if(Math.sqrt(Math.pow((int)point.x-(int)point2.x,2)+(Math.pow((int)point.x-(int)point2.x,2)))<2)
                                 {
                               //      System.out.println("glglg");
