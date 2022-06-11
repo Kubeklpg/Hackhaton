@@ -449,9 +449,13 @@ public class ExportService extends Service<Void> {
             case 2:
 
 
-                int diff = arr[2][1]/2;
-                if(point.i > arr[2][0] && point.i < point.i + diff){
-                    world.setBlock(x,z,y*-1,SimpleBlock.COBBLESTONE);
+                int diff = arr[2][1]/40;
+                if(point.i > arr[2][0] && point.i < arr[2][0] +39* diff){
+                    if(point.g <170)
+                    {
+                        world.setBlock(x,z,y*-1,SimpleBlock.COBBLESTONE);
+                    }else world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
+
                 }else world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
 
 
