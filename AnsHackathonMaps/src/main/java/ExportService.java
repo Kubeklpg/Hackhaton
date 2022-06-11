@@ -319,9 +319,20 @@ public class ExportService extends Service<Void> {
                             world.setBlock(x, -43, z, SimpleBlock.GLASS_PANE);
                         }
                     } */
+                    double min=1000;
                     for (int i = 0; i < points3dList_v2.size(); i++) {
                         Point3d point = points3dList_v2.get(i);
-                        world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
+                        GenBlocks(point,world);
+                        if(point.z < min) min=point.z;
+                        //world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
+                    }
+                    for (int x = 0; x < 1000; x++) {
+                        for (int z = 0; z < 1000; z++) {
+                            // Set glass
+                            for (int y = (int) min; y < (int) min - 4; y++) {
+                                world.setBlock(x, y, z, SimpleBlock.GLASS);
+                            }
+                        }
                     }
                     //  save the world
                     world.save();
@@ -413,5 +424,40 @@ public class ExportService extends Service<Void> {
 
     public void setMax(long max) {
         this.max = max;
+    }
+
+    public void GenBlocks(Point3d point,World world){
+        int x = (int)point.x;
+        int y = (int)point.y;
+        int z = (int)point.z;
+
+        int cat = (int)point.c;
+        switch (cat){
+
+            case 2:
+                world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
+                break;
+            case 3:
+                world.setBlock(x,z,y*-1,SimpleBlock.SAPLING);
+                break;
+            case 4:
+                world.setBlock(x,z,y*-1,SimpleBlock.LOG);
+                break;
+            case 5:
+                world.setBlock(x,z,y*-1,SimpleBlock.LEAVES);
+                break;
+            case 6:
+                world.setBlock(x, z, y*-1, SimpleBlock.STONE);
+                break;
+                /*
+
+            case 9:
+                world.setBlock(x,z,y*-1,SimpleBlock.WATER);
+                break;
+
+                 */
+
+
+        }
     }
 }
