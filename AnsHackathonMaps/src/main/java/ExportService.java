@@ -25,10 +25,7 @@ import javafx.scene.transform.Affine;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import net.morbz.minecraft.blocks.DoorBlock;
-import net.morbz.minecraft.blocks.Material;
-import net.morbz.minecraft.blocks.SandBlock;
-import net.morbz.minecraft.blocks.SimpleBlock;
+import net.morbz.minecraft.blocks.*;
 import net.morbz.minecraft.blocks.states.Facing4State;
 import net.morbz.minecraft.level.FlatGenerator;
 import net.morbz.minecraft.level.GameType;
@@ -45,7 +42,7 @@ public class ExportService extends Service<Void> {
     private long pointsCount;
     private long pointsExportCount;
 
-    private List<Point3d> points3dList, points3dList_v2, pointOfBuilding, pointsOfGround, pointOfVegetation4;
+    private List<Point3d> points3dList, points3dList_v2, pointOfBuilding, pointsOfGround, pointOfVegetation4, pointsOfTrees;
     private Map<String, String> dictionary;
     private List<Cube3d> cube3dList;
     private List<Cube3d> cube3dListNew;
@@ -151,6 +148,7 @@ public class ExportService extends Service<Void> {
                 pointOfBuilding = new ArrayList<Point3d>();
                 pointsOfGround = new ArrayList<Point3d>();
                 pointOfVegetation4 = new ArrayList<Point3d>();
+                pointsOfTrees = new ArrayList<Point3d>();
                 dictionary  = new HashMap<String, String>();
                 counter = 0;
                 currentState = true;
@@ -215,7 +213,7 @@ public class ExportService extends Service<Void> {
                         }
 
                     }
-                    System.out.println("Prawidlowych pkt: " + points3dList.size());
+                    //System.out.println("Prawidlowych pkt: " + points3dList.size());
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -224,7 +222,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("2 z 6: Normalizacja danych...");
+                                setCurrentWork("2 z 7: Normalizacja danych...");
                             }
                     );
                     for(int i = 0; i < points3dList.size(); i++)
@@ -247,7 +245,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("3 z 6: Sortowanie danych...");
+                                setCurrentWork("3 z 7: Sortowanie danych...");
                             }
                     );
                     Comparator<Point3d> comp = Comparator.comparing(Point3d::getDoubleX).thenComparingDouble(Point3d::getDoubleY).thenComparingDouble(Point3d::getDoubleZ);
@@ -259,7 +257,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("4 z 6: Tworzenie listy...");
+                                setCurrentWork("4 z 7: Tworzenie list...");
                             }
                     );
                     for(int i = 0; i < points3dList.size(); i++){
@@ -272,7 +270,7 @@ public class ExportService extends Service<Void> {
                         }
                     }
                     for(int i = 0; i < points3dList.size(); i++){
-                        if(points3dList.get(i).c == 4.0){
+                        if(points3dList.get(i).c == 5.0){
                             pointOfVegetation4.add(points3dList.get(i));
                         }
                     }
@@ -288,12 +286,13 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("5 z 6: Usuwanie duplikatow...");
+                                setCurrentWork("5 z 7: Usuwanie duplikatow...");
                             }
                     );
                     Point3d point = points3dList.get(0);
                     for(int i = 0; i < points3dList.size(); i++){
                         Point3d point2 = points3dList.get(i);
+                        if(point.c != 2.0 || point.c != 6.0)
                             if(point.x != point2.x) {
                                 points3dList_v2.add(point);
                                 point = point2;
@@ -309,17 +308,35 @@ public class ExportService extends Service<Void> {
                             else {
                                 point = point2;
                             }
+                        else point = point2;
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                try {
+                    Platform.runLater(
+                            () -> {
+                                setCurrentWork("6 z 7: Tworzenie drzew...");
+                            }
+                    );
+                    //pointOfVegetation4
+                    /* for(int i = 0; i < pointOfVegetation4.size(); i++){
+                        Point3d pointA = pointOfVegetation4.get(i);
+                        int pointsAround = 0;
+                        for(int j = 0; j < pointOfVegetation4.size(); j++){
+                            Point3d pointB = pointOfVegetation4.get(i);
+                        }
+                    } */
 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("6 z 6: Tworzenie mapy...");
+                                setCurrentWork("7 z 7: Tworzenie mapy...");
                             }
                     );
 
@@ -353,9 +370,14 @@ public class ExportService extends Service<Void> {
                     for(int i = 0; i < pointsOfGround.size(); i++){
                         Point3d point = pointsOfGround.get(i);
                         GenBlocks(point,world,arr);
-                    }for(int i = 0; i < pointOfBuilding.size(); i++){
+                    }
+                    for(int i = 0; i < pointOfBuilding.size(); i++){
                         Point3d point = pointOfBuilding.get(i);
                         GenBlocks(point,world,arr);
+                    }
+                    for(int i = 0; i < pointsOfTrees.size(); i++){
+                        Point3d point = pointsOfTrees.get(i);
+                        GenTree(point,world);
                     }
 
                     world.save();
@@ -430,13 +452,23 @@ public class ExportService extends Service<Void> {
         this.max = max;
     }
 
+    public void GenTree(Point3d point, World world){
+        point.x  = (double) Math.round(point.x);
+        int x = (int)point.x;
+        point.y  = (double) Math.round(point.y);
+        int y = (int) point.y;
+        point.z  = (double) Math.round(point.z);
+        int z = (int)point.z;
+
+        for(int i = 0; i < 20; i++){
+            world.setBlock(x,z-i,y*-1,SimpleBlock.LOG);
+        }
+    }
     public void GenBlocks(Point3d point,World world,int[][] arr){
         point.x  = (double) Math.round(point.x);
         int x = (int)point.x;
         point.y  = (double) Math.round(point.y);
         int y = (int) point.y;
-
-
         point.z  = (double) Math.round(point.z);
         int z = (int)point.z;
 
@@ -447,19 +479,20 @@ public class ExportService extends Service<Void> {
                     world.setBlock(x,z-i,y*-1,SimpleBlock.COAL_BLOCK);
                 break;
             case 2:
-
-
-
                 int diff = arr[2][1]/4;
 
-                if(point.i > arr[2][0] && point.i < arr[2][0] + 1.83*diff) {
+                if(point.i > arr[2][0] && point.i < arr[2][0] + 1.80*diff){
+                    world.setBlock(x, z, y * -1,SimpleBlock.SAND);
+                    for(int j = 0; j < 7; j++){
+                        world.setBlock(x, (int) z - j, y * -1, SimpleBlock.COBBLESTONE);
+                    }
+                }else if(point.i > arr[2][0] && point.i < arr[2][0] + 1.83*diff) {
                     world.setBlock(x, z, y * -1, SimpleBlock.COBBLESTONE);
-
                     for(int i = -1; i < 2; i ++) world.setBlock(x+i,z,i+y*-1,SimpleBlock.COBBLESTONE);
                     for(int j = 0; j < 7; j++){
                         world.setBlock(x, (int) z - j, y * -1, SimpleBlock.COBBLESTONE);
                     }
-                } else if(point.i > arr[2][0] && point.i < arr[2][0] + 1.86*diff) {
+                } else if(point.i > arr[2][0] && point.i < arr[2][0] + 1.85*diff) {
                     world.setBlock(x, z, y * -1, SimpleBlock.GRAVEL);
                     //world.setBlock(x, z, y * -1,SimpleBlock.SAND);
                     for(int i = -1; i < 2; i ++) world.setBlock(x+i,z,i+y*-1,SimpleBlock.GRAVEL);/*world.setBlock(x+i,z,i+y*-1,SimpleBlock.SAND);*/
@@ -474,21 +507,20 @@ public class ExportService extends Service<Void> {
                         world.setBlock(x, (int) z - j, y * -1, SimpleBlock.GRASS);
                     }
                 }
-
                 break;
             case 3:
                 world.setBlock(x,z,y*-1,SimpleBlock.YELLOW_FLOWER);
                 world.setBlock(x,z-1,y*-1,SimpleBlock.DIRT);
                 break;
             case 4:
-                world.setBlock(x,z+1,y*-1,SimpleBlock.SLIME_BLOCK);
+                world.setBlock(x,z+1,y*-1,new StainedBlock(StainedBlock.StainedMaterial.WOOL, StainedBlock.StainedColor.GREEN));
                 for(int i = 0; i < 10; i++){
                     world.setBlock(x,z-i,y*-1,SimpleBlock.LOG);
                 }
                 break;
             case 5:
-                world.setBlock(x,z,y*-1,SimpleBlock.SLIME_BLOCK);
-                for(int i = -1; i < 2; i ++) world.setBlock(x+i,z+i,i+y*-1,SimpleBlock.SLIME_BLOCK);
+                world.setBlock(x,z,y*-1,new StainedBlock(StainedBlock.StainedMaterial.WOOL, StainedBlock.StainedColor.GREEN));
+                for(int i = -1; i < 2; i ++) world.setBlock(x+i,z+i,i+y*-1,new StainedBlock(StainedBlock.StainedMaterial.WOOL, StainedBlock.StainedColor.GREEN));
                 break;
             case 6:
                 int differ = arr[6][1]/20;
