@@ -188,6 +188,7 @@ public class ExportService extends Service<Void> {
                                 point3d.r = Integer.parseInt(pointArray[3]);    // Red
                                 point3d.g = Integer.parseInt(pointArray[4]);    // Green
                                 point3d.b = Integer.parseInt(pointArray[5]);    // Blue
+                                point3d.i = Double.parseDouble(pointArray[8]);
                                 point3d.c = Double.parseDouble(pointArray[9]);  // classification
                                 if(!isMin){
                                     minX = point3d.x;
@@ -235,7 +236,7 @@ public class ExportService extends Service<Void> {
                     }
                     System.out.println("Normalizacja");
                     for(int i = 0; i < 1000; i++){
-                        System.out.println(points3dList.get(i));
+                        System.out.println(points3dList.get(i).i);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -294,8 +295,6 @@ public class ExportService extends Service<Void> {
                                 setCurrentWork("5 z 5: rozklad chmury do mapy...");
                             }
                     );
-
-
 
                     DefaultLayers layers = new DefaultLayers();
                     layers.setLayer(-64, Material.BEDROCK);

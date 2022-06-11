@@ -58,6 +58,7 @@ public class Vector3d {
     public Integer g;
     public Integer b;
     public double c;
+    public double i;
 
 
     /**
@@ -89,7 +90,6 @@ public class Vector3d {
     public Vector3d(double x, double y, double z, Integer r, Integer g, Integer b) {
         set(x, y, z, r, g ,b);
     }
-
 
     /**
      * Gets a single element of this vector. Elements 0, 1, and 2 correspond to
@@ -165,7 +165,7 @@ public class Vector3d {
         r = v1.r;
         g = v1.g;
         b = v1.b;
-
+        i = v1.i;
     }
 
     /**
