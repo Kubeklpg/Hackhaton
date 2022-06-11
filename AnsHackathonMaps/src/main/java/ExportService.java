@@ -27,6 +27,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import net.morbz.minecraft.blocks.DoorBlock;
 import net.morbz.minecraft.blocks.Material;
+import net.morbz.minecraft.blocks.RailBlock;
 import net.morbz.minecraft.blocks.SimpleBlock;
 import net.morbz.minecraft.blocks.states.Facing4State;
 import net.morbz.minecraft.level.FlatGenerator;
@@ -44,7 +45,8 @@ public class ExportService extends Service<Void> {
     private long pointsCount;
     private long pointsExportCount;
 
-    private List<Point3d> points3dList, points3dList_v2, pointOfBuilding, pointsOfGround, pointOfVegetation4;
+    private List<Point3d> points3dList, points3dList_v2, pointOfBuilding, pointsOfGround, pointOfVegetation4, pointsOfClass, pointsOfVege;
+
     private Map<String, String> dictionary;
     private List<Cube3d> cube3dList;
     private List<Cube3d> cube3dListNew;
@@ -149,6 +151,8 @@ public class ExportService extends Service<Void> {
                 points3dList_v2 = new ArrayList<Point3d>();
                 pointOfBuilding = new ArrayList<Point3d>();
                 pointsOfGround = new ArrayList<Point3d>();
+                pointsOfClass = new ArrayList<Point3d>();
+                pointsOfVege = new ArrayList<Point3d>();
                 pointOfVegetation4 = new ArrayList<Point3d>();
                 dictionary  = new HashMap<String, String>();
                 counter = 0;
@@ -276,7 +280,16 @@ public class ExportService extends Service<Void> {
                             pointOfVegetation4.add(points3dList.get(i));
                         }
                     }
-
+                    for(int i = 0; i < points3dList.size(); i++){
+                        if(points3dList.get(i).c == 0.0){
+                            pointsOfClass.add(points3dList.get(i));
+                        }
+                    }
+                    for(int i = 0; i < points3dList.size(); i++){
+                        if(points3dList.get(i).c == 0.0){
+                            pointsOfVege.add(points3dList.get(i));
+                        }
+                    }
                     Comparator<Point3d> comp2 = Comparator.comparing(Point3d::getIntensity);
                     Collections.sort(pointsOfGround, comp2);
                     Collections.reverse(pointsOfGround);
@@ -342,6 +355,7 @@ public class ExportService extends Service<Void> {
                         }
                     }
 
+
                     for (int i = 0; i < points3dList_v2.size(); i++) {
                         Point3d point = points3dList_v2.get(i);
                         GenBlocks(point,world,arr);
@@ -354,7 +368,31 @@ public class ExportService extends Service<Void> {
                         GenBlocks(point,world,arr);
                     }
 
+                    System.out.println(pointsOfClass.size());
+                    for(int i = 0; i < pointsOfClass.size(); i++){
 
+                        Point3d point = pointsOfClass.get(i);
+                        if((int)point.z>=30)
+                        {
+                            for(int j = 0; j < pointsOfClass.size(); j++)
+                            {
+                                Point3d point2 = pointsOfClass.get(j);
+
+
+                                if(Math.sqrt(Math.pow((int)point.x-(int)point2.x,2)+(Math.pow((int)point.x-(int)point2.x,2)))<2)
+                                {
+                              //      System.out.println("glglg");
+                                    System.out.println(point.x);
+                                    System.out.println(point.y);
+                              //      System.out.println(point.c);
+                                    world.setBlock((int)point.x,(int)point.z,-(int)point.y, SimpleBlock.GLOWSTONE);
+                                }
+                            }
+                        }
+                        //GenBlocks(point,world,arr);
+                    }
+
+                    System.out.println(pointsOfVege.size());
                     world.save();
 
                 } catch (Throwable e) {
@@ -442,6 +480,7 @@ public class ExportService extends Service<Void> {
             case 0:
                 for(int i = 0; i < 5; i ++)
                     world.setBlock(x,z-i,y*-1,SimpleBlock.COAL_BLOCK);
+
                 break;
             case 2:
 
