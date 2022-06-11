@@ -321,13 +321,19 @@ public class ExportService extends Service<Void> {
                             }
                     );
                     //pointOfVegetation4
-                    /* for(int i = 0; i < pointOfVegetation4.size(); i++){
+                    for(int i = 0; i < pointOfVegetation4.size(); i++){
                         Point3d pointA = pointOfVegetation4.get(i);
                         int pointsAround = 0;
                         for(int j = 0; j < pointOfVegetation4.size(); j++){
+                            double odl = 0;
                             Point3d pointB = pointOfVegetation4.get(i);
+                            if(pointA.z < pointB.z + 5.0){
+                                odl = Math.sqrt(Math.pow(pointA.x-pointB.x,2)+Math.pow(pointA.y-pointB.y,2));
+                                if(odl < 7) pointsAround++;
+                            }
                         }
-                    } */
+                        if(pointsAround > 30) pointsOfTrees.add(pointA);
+                    }
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -371,10 +377,12 @@ public class ExportService extends Service<Void> {
                         Point3d point = pointsOfGround.get(i);
                         GenBlocks(point,world,arr);
                     }
+
                     for(int i = 0; i < pointOfBuilding.size(); i++){
                         Point3d point = pointOfBuilding.get(i);
                         GenBlocks(point,world,arr);
                     }
+
                     for(int i = 0; i < pointsOfTrees.size(); i++){
                         Point3d point = pointsOfTrees.get(i);
                         GenTree(point,world);
