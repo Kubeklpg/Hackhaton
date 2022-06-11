@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import ConvexHull.Point3d;
 import ConvexHull.Point3dFixed;
@@ -190,17 +191,19 @@ public class ExportService extends Service<Void> {
                                 point3d.b = Integer.parseInt(pointArray[5]);    // Blue
                                 point3d.i = Double.parseDouble(pointArray[8]);
                                 point3d.c = Double.parseDouble(pointArray[9]);  // classification
-                                if(!isMin){
-                                    minX = point3d.x;
-                                    minY = point3d.y;
-                                    minZ = point3d.z;
-                                    isMin = true;
-                                }
-                                minX = Math.min(minX, point3d.x);
-                                minY = Math.min(minY, point3d.y);
-                                minZ = Math.min(minZ, point3d.z);
+                                if(point3d.c != 7.0){
+                                    if(!isMin){
+                                        minX = point3d.x;
+                                        minY = point3d.y;
+                                        minZ = point3d.z;
+                                        isMin = true;
+                                    }
+                                    minX = Math.min(minX, point3d.x);
+                                    minY = Math.min(minY, point3d.y);
+                                    minZ = Math.min(minZ, point3d.z);
 
-                                points3dList.add(point3d);
+                                    points3dList.add(point3d);
+                                }
 
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -208,10 +211,6 @@ public class ExportService extends Service<Void> {
 
                             counter++;
                             updateProgress(counter, max);
-                        }
-                        System.out.println("Wczytanie pkt");
-                        for(int i = 0; i < 1000; i++){
-                            System.out.println(points3dList.get(i));
                         }
 
                     }
@@ -224,7 +223,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("2 z 5: Normalizacja danych. ");
+                                setCurrentWork("2 z 5: Normalizacja danych...");
                             }
                     );
 
@@ -234,10 +233,6 @@ public class ExportService extends Service<Void> {
                         points3dList.get(i).y = points3dList.get(i).y - minY;
                         points3dList.get(i).z = points3dList.get(i).z - minZ;
                     }
-                    System.out.println("Normalizacja");
-                    for(int i = 0; i < 1000; i++){
-                        System.out.println(points3dList.get(i).i);
-                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -245,15 +240,11 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("3 z 5: Sortowanie danych. ");
+                                setCurrentWork("3 z 5: Sortowanie danych...");
                             }
                     );
-
-                    //Collections.sort(points3dList, new Sortbyroll());
-                    //System.out.println("Sortowanie");
-                    //for(int i = 0; i < 1000; i++){
-                    //    System.out.println(points3dList.get(i));
-                    //}
+                    Comparator<Point3d> comp = Comparator.comparing(Point3d::getDoubleX).thenComparingDouble(Point3d::getDoubleY).thenComparingDouble(Point3d::getDoubleZ);
+                    Collections.sort(points3dList, comp);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -262,27 +253,30 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("4 z 5: Grupowanie danych. ");
+                                setCurrentWork("4 z 5: Grupowanie danych...");
                             }
                     );
-                    /* Point3d point = points3dList.get(0);
-                     for(int i = 1; i < points3dList.size(); i++){
+                    Point3d point = points3dList.get(0);
+                    for(int i = 1; i < points3dList.size(); i++){
                         Point3d point2 = points3dList.get(i);
+                        if((int)point.x != (int)point2.x) {
+                            points3dList_v2.add(point);
+                            point = point2;
+                        }
+                        else if ((int)point.y != (int)point2.y ) {
+                            points3dList_v2.add(point);
+                            point = point2;
+                        }
+                        else if ((int)point.z != (int)point2.z) {
+                            points3dList_v2.add(point);
+                            point = point2;
+                        }
+                        else {
+                            point = point2;
+                        }
 
-                        if(point.x != point2.x) points3dList_v2.add(point);
-                        else if(point.y != point2.y ) points3dList_v2.add(point);
-                        else if (point.z != point2.z) points3dList_v2.add(point);
-                        else point = point2;
-                    } */
-                    for(int i = 0; i < points3dList.size(); i++){
-                        Point3d point2 = points3dList.get(i);
-                        points3dList_v2.add(point2);
                     }
-
-                    System.out.println("Grupowanie");
-                    for(int i = 0; i < 1000; i++){
-                        System.out.println(points3dList_v2.get(i));
-                    }
+                    System.out.println(points3dList_v2.size());
 
 
                 } catch (Exception e) {
@@ -341,7 +335,6 @@ public class ExportService extends Service<Void> {
 
         };
     }
-
     public static class Sortbyroll implements Comparator<Point3d>
     {
         // Used for sorting in ascending order of
