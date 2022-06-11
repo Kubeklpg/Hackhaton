@@ -211,11 +211,11 @@ public class ExportService extends Service<Void> {
                         }
                         System.out.println("Wczytanie pkt");
                         for(int i = 0; i < 1000; i++){
-                            System.out.println(points3dList.get(i));
+                           // System.out.println(points3dList.get(i));
                         }
 
                     }
-                    System.out.println("Prawidlowych pkt: " + points3dList.size());
+                   // System.out.println("Prawidlowych pkt: " + points3dList.size());
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -234,10 +234,13 @@ public class ExportService extends Service<Void> {
                         points3dList.get(i).y = points3dList.get(i).y - minY;
                         points3dList.get(i).z = points3dList.get(i).z - minZ;
                     }
+                    /*
                     System.out.println("Normalizacja");
                     for(int i = 0; i < 1000; i++){
                         System.out.println(points3dList.get(i).i);
                     }
+
+                     */
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -278,12 +281,15 @@ public class ExportService extends Service<Void> {
                         Point3d point2 = points3dList.get(i);
                         points3dList_v2.add(point2);
                     }
-
+/*
                     System.out.println("Grupowanie");
                     for(int i = 0; i < 1000; i++){
-                        System.out.println(points3dList_v2.get(i));
+                        //System.out.println(points3dList_v2.get(i));
                     }
 
+
+
+ */
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -319,12 +325,15 @@ public class ExportService extends Service<Void> {
                         }
                     } */
                     double min=1000;
-                    for (int i = 0; i < points3dList_v2.size(); i++) {
+                    for (int i = 0; i < 10000; i++) {
                         Point3d point = points3dList_v2.get(i);
-                        GenBlocks(point,world);
+                        int[][] arr = Indentity(points3dList);
+                        GenBlocks(point,world,arr);
+                       //System.out.println(i);
                         if(point.z < min) min=point.z;
                         //world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
                     }
+                   /*
                     for (int x = 0; x < 1000; x++) {
                         for (int z = 0; z < 1000; z++) {
                             // Set glass
@@ -333,6 +342,8 @@ public class ExportService extends Service<Void> {
                             }
                         }
                     }
+
+                    */
                     //  save the world
                     world.save();
 
@@ -425,7 +436,7 @@ public class ExportService extends Service<Void> {
         this.max = max;
     }
 
-    public void GenBlocks(Point3d point,World world){
+    public void GenBlocks(Point3d point,World world,int[][] arr){
         int x = (int)point.x;
         int y = (int)point.y;
         int z = (int)point.z;
@@ -434,7 +445,27 @@ public class ExportService extends Service<Void> {
         switch (cat){
 
             case 2:
-                world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
+                int len = arr[2][1] - arr[2][0];
+                double diff = len/5;
+                if(point.i > arr[2][0] && point.i < point.i + diff){
+                    world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
+                }
+                else if(point.i >= point.i + diff && point.i < point.i + 2*diff){
+                    world.setBlock(x,z,y*-1,SimpleBlock.DIRT);
+                }
+                else if(point.i >= point.i + 2*diff && point.i < point.i + 3*diff){
+                    world.setBlock(x,z,y*-1,SimpleBlock.STONE);
+                }
+                else if(point.i >= point.i + 3*diff && point.i < point.i + 4*diff){
+                    world.setBlock(x,z,y*-1,SimpleBlock.COBBLESTONE);
+                }
+                else if(point.i >= point.i + 4*diff && point.i < point.i + 5*diff){
+                    world.setBlock(x,z,y*-1,SimpleBlock.OBSIDIAN);
+                }
+                else if(point.i >= point.i + 5*diff && point.i < point.i + arr[2][1]){
+                world.setBlock(x,z,y*-1,SimpleBlock.COAL_BLOCK);
+                }else world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
+
                 break;
             case 3:
                 world.setBlock(x,z,y*-1,SimpleBlock.SAPLING);
@@ -458,5 +489,26 @@ public class ExportService extends Service<Void> {
 
 
         }
+    }
+
+    public int[][] Indentity(List<Point3d> points3dList){
+        int[][] arr = new int[9][2];
+        for(int i = 0 ; i < arr.length ; i ++){
+            arr[i][0]=0;
+            arr[i][1]=0;
+        }
+        for(int i = 0 ; i < points3dList.size();i++) {
+            Point3d point = points3dList.get(i);
+            if(point.c == 2.0){
+                arr[2][0] = Math.min(arr[2][0],(int)point.i);
+                arr[2][1] = Math.max(arr[2][0],(int)point.i);
+            } else if (point.c == 6.0) {
+                arr[6][0] = Math.min(arr[6][0],(int)point.i);
+                arr[6][1] = Math.max(arr[6][0],(int)point.i);
+            }
+
+        }
+
+        return arr;
     }
 }

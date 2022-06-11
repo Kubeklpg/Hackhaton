@@ -92,6 +92,7 @@ public enum SimpleBlock implements IBlock {
 	BARRIER(Material.BARRIER),
 	SEA_LANTERN(Material.SEA_LANTERN),
 	HARDENED_CLAY(Material.HARDENED_CLAY),
+	DIRT(Material.DIRT),
 	COAL_BLOCK(Material.COAL_BLOCK),
 	PACKED_ICE(Material.PACKED_ICE),
 	SPRUCE_FENCE(Material.SPRUCE_FENCE),
