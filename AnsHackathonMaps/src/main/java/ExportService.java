@@ -183,8 +183,8 @@ public class ExportService extends Service<Void> {
 
                                 Point3d point3d = new Point3d();
                                 point3d.x = Double.parseDouble(pointArray[0]);  // x
-                                point3d.y = Double.parseDouble(pointArray[2]);  // y
-                                point3d.z = Double.parseDouble(pointArray[1]);  // z
+                                point3d.y = Double.parseDouble(pointArray[1]);  // y
+                                point3d.z = Double.parseDouble(pointArray[2]);  // z
                                 point3d.r = Integer.parseInt(pointArray[3]);    // Red
                                 point3d.g = Integer.parseInt(pointArray[4]);    // Green
                                 point3d.b = Integer.parseInt(pointArray[5]);    // Blue
@@ -208,6 +208,10 @@ public class ExportService extends Service<Void> {
                             counter++;
                             updateProgress(counter, max);
                         }
+                        System.out.println("Wczytanie pkt");
+                        for(int i = 0; i < 1000; i++){
+                            System.out.println(points3dList.get(i));
+                        }
 
                     }
                     System.out.println("Prawidlowych pkt: " + points3dList.size());
@@ -229,7 +233,10 @@ public class ExportService extends Service<Void> {
                         points3dList.get(i).y = points3dList.get(i).y - minY;
                         points3dList.get(i).z = points3dList.get(i).z - minZ;
                     }
-
+                    System.out.println("Normalizacja");
+                    for(int i = 0; i < 1000; i++){
+                        System.out.println(points3dList.get(i));
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -241,7 +248,11 @@ public class ExportService extends Service<Void> {
                             }
                     );
 
-                    Collections.sort(points3dList, new Sortbyroll());
+                    //Collections.sort(points3dList, new Sortbyroll());
+                    //System.out.println("Sortowanie");
+                    //for(int i = 0; i < 1000; i++){
+                    //    System.out.println(points3dList.get(i));
+                    //}
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -253,14 +264,23 @@ public class ExportService extends Service<Void> {
                                 setCurrentWork("4 z 5: Grupowanie danych. ");
                             }
                     );
-                    Point3d point = new Point3d(points3dList.get(0));
-                    for(int i = 1; i < points3dList.size(); i++){
-                        Point3d point2 = new Point3d(points3dList.get(i));
+                    /* Point3d point = points3dList.get(0);
+                     for(int i = 1; i < points3dList.size(); i++){
+                        Point3d point2 = points3dList.get(i);
 
                         if(point.x != point2.x) points3dList_v2.add(point);
                         else if(point.y != point2.y ) points3dList_v2.add(point);
                         else if (point.z != point2.z) points3dList_v2.add(point);
                         else point = point2;
+                    } */
+                    for(int i = 0; i < points3dList.size(); i++){
+                        Point3d point2 = points3dList.get(i);
+                        points3dList_v2.add(point2);
+                    }
+
+                    System.out.println("Grupowanie");
+                    for(int i = 0; i < 1000; i++){
+                        System.out.println(points3dList_v2.get(i));
                     }
 
 
@@ -282,12 +302,13 @@ public class ExportService extends Service<Void> {
                     IGenerator generator = new FlatGenerator(layers);
                     Level level = new Level("HackathonMap", generator);
                     level.setGameType(GameType.CREATIVE);
+                    level.setMapFeatures(false);
 
                     World world = new World(level, layers);
 
                     // Create a huge structure of glass that has an area of 100x100 blocks and is 50 blocks height.
                     // On top of the glass structure we have a layer of grass.
-                    level.setSpawnPoint(50, 20 + 1, 50);
+                    level.setSpawnPoint(0, (int) (minZ+100.0), 0);
                     /* for (int x = 0; x < 400; x++) {
                         for (int z = 0; z < 400; z++) {
                             // Set glass
@@ -299,8 +320,8 @@ public class ExportService extends Service<Void> {
                         }
                     } */
                     for (int i = 0; i < points3dList_v2.size(); i++) {
-                        Point3dFixed point = points3dList_v2.get(i);
-                        world.setBlock((int) point.x, (int) point.y, (int) point.z, SimpleBlock.GRASS);
+                        Point3d point = points3dList_v2.get(i);
+                        world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
                     }
                     //  save the world
                     world.save();
@@ -322,7 +343,7 @@ public class ExportService extends Service<Void> {
         };
     }
 
-    class Sortbyroll implements Comparator<Point3d>
+    public static class Sortbyroll implements Comparator<Point3d>
     {
         // Used for sorting in ascending order of
         // roll number

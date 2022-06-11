@@ -16,8 +16,8 @@ class Vertex {
         pnt = new Point3d();
     }
 
-    public Vertex(double x, double y, double z, Integer r, Integer g, Integer b, double c, int idx) {
-        pnt = new Point3d(x, y, z, r, g, b, c);
+    public Vertex(double x, double y, double z, Integer r, Integer g, Integer b, double i, double c, int idx) {
+        pnt = new Point3d(x, y, z, r, g, b, i, c);
         index = idx;
     }
 
