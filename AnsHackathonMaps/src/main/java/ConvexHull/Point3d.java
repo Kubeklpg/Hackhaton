@@ -22,8 +22,12 @@ public class Point3d extends Vector3d {
                 r,
                 g,
                 b,
+                i,
                 c
         );
+    }
+
+    private void set(double x, double y, double z, Integer r, Integer g, Integer b, double i, double c) {
     }
 
 }
