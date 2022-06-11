@@ -12,6 +12,7 @@ public class Point3d extends Vector3d {
             Integer r,
             Integer g,
             Integer b,
+            double i,
             double c
     ) {
         set(

@@ -1,4 +1,10 @@
+import java.io.*;
+import java.util.*;
+
 import ConvexHull.Point3d;
+import ConvexHull.Point3dFixed;
+import ConvexHull.ConvexHull3D;
+import Octree.AABB;
 import Octree.Cube3d;
 import Octree.Octree;
 import javafx.application.Platform;
@@ -6,29 +12,29 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point3D;
-import javafx.scene.Group;
-import javafx.scene.PerspectiveCamera;
-import javafx.scene.Scene;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.*;
 import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
 import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Box;
+import javafx.scene.shape.Shape3D;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Rotate;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import net.morbz.minecraft.blocks.DoorBlock;
 import net.morbz.minecraft.blocks.Material;
 import net.morbz.minecraft.blocks.SimpleBlock;
+import net.morbz.minecraft.blocks.states.Facing4State;
 import net.morbz.minecraft.level.FlatGenerator;
 import net.morbz.minecraft.level.GameType;
 import net.morbz.minecraft.level.IGenerator;
 import net.morbz.minecraft.level.Level;
 import net.morbz.minecraft.world.DefaultLayers;
 import net.morbz.minecraft.world.World;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ExportService extends Service<Void> {
 
@@ -39,6 +45,8 @@ public class ExportService extends Service<Void> {
     private long pointsExportCount;
 
     private List<Point3d> points3dList;
+    private List<Point3d> points3dList_v2;
+    private Map<String, String> dictionary;
     private List<Cube3d> cube3dList;
     private List<Cube3d> cube3dListNew;
     //    private List<Cube3d> cube3dListLocalTemp;
@@ -139,11 +147,15 @@ public class ExportService extends Service<Void> {
                 );
 
                 points3dList = new ArrayList<Point3d>();
+                points3dList_v2 = new ArrayList<Point3d>();
+                dictionary  = new HashMap<String, String>();
                 counter = 0;
                 currentState = true;
 
                 // ilosc operacji do progressu
                 max = pointsCount;
+                double minX = 0, minY = 0, minZ = 0;
+                boolean isMin = false;
 
                 try {
 
@@ -154,7 +166,7 @@ public class ExportService extends Service<Void> {
 
                         Platform.runLater(
                                 () -> {
-                                    setCurrentWork("1 z 4: Dekodowanie plikow...");
+                                    setCurrentWork("1 z 5: Dekodowanie plikow...");
                                 }
                         );
 
@@ -166,18 +178,27 @@ public class ExportService extends Service<Void> {
 
                             try {
 
-
                                 String[] pointArray = new String[10];
                                 pointArray = row.split(",");
 
                                 Point3d point3d = new Point3d();
                                 point3d.x = Double.parseDouble(pointArray[0]);  // x
-                                point3d.y = Double.parseDouble(pointArray[2]);  // y
-                                point3d.z = Double.parseDouble(pointArray[1]);  // z
+                                point3d.y = Double.parseDouble(pointArray[1]);  // y
+                                point3d.z = Double.parseDouble(pointArray[2]);  // z
                                 point3d.r = Integer.parseInt(pointArray[3]);    // Red
                                 point3d.g = Integer.parseInt(pointArray[4]);    // Green
                                 point3d.b = Integer.parseInt(pointArray[5]);    // Blue
                                 point3d.c = Double.parseDouble(pointArray[9]);  // classification
+                                if(!isMin){
+                                    minX = point3d.x;
+                                    minY = point3d.y;
+                                    minZ = point3d.z;
+                                    isMin = true;
+                                }
+                                minX = Math.min(minX, point3d.x);
+                                minY = Math.min(minY, point3d.y);
+                                minZ = Math.min(minZ, point3d.z);
+
                                 points3dList.add(point3d);
 
                             } catch (Exception e) {
@@ -187,6 +208,10 @@ public class ExportService extends Service<Void> {
                             counter++;
                             updateProgress(counter, max);
                         }
+                        System.out.println("Wczytanie pkt");
+                        for(int i = 0; i < 1000; i++){
+                            System.out.println(points3dList.get(i));
+                        }
 
                     }
                     System.out.println("Prawidlowych pkt: " + points3dList.size());
@@ -195,49 +220,78 @@ public class ExportService extends Service<Void> {
                     e.printStackTrace();
                 }
 
+                try {
+                    Platform.runLater(
+                            () -> {
+                                setCurrentWork("2 z 5: Normalizacja danych. ");
+                            }
+                    );
 
+                    for(int i = 0; i < points3dList.size(); i++)
+                    {
+                        points3dList.get(i).x = points3dList.get(i).x - minX;
+                        points3dList.get(i).y = points3dList.get(i).y - minY;
+                        points3dList.get(i).z = points3dList.get(i).z - minZ;
+                    }
+                    System.out.println("Normalizacja");
+                    for(int i = 0; i < 1000; i++){
+                        System.out.println(points3dList.get(i));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("2 z 4: zadanie skalowanie x-y");
+                                setCurrentWork("3 z 5: Sortowanie danych. ");
                             }
                     );
 
-                    /// zadanie
+                    //Collections.sort(points3dList, new Sortbyroll());
+                    //System.out.println("Sortowanie");
+                    //for(int i = 0; i < 1000; i++){
+                    //    System.out.println(points3dList.get(i));
+                    //}
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    Platform.runLater(
+                            () -> {
+                                setCurrentWork("4 z 5: Grupowanie danych. ");
+                            }
+                    );
+                    /* Point3d point = points3dList.get(0);
+                     for(int i = 1; i < points3dList.size(); i++){
+                        Point3d point2 = points3dList.get(i);
+
+                        if(point.x != point2.x) points3dList_v2.add(point);
+                        else if(point.y != point2.y ) points3dList_v2.add(point);
+                        else if (point.z != point2.z) points3dList_v2.add(point);
+                        else point = point2;
+                    } */
+                    for(int i = 0; i < points3dList.size(); i++){
+                        Point3d point2 = points3dList.get(i);
+                        points3dList_v2.add(point2);
+                    }
+
+                    System.out.println("Grupowanie");
+                    for(int i = 0; i < 1000; i++){
+                        System.out.println(points3dList_v2.get(i));
+                    }
 
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("3 z 4: zadanie ...");
-                            }
-                    );
-
-                    //zadanie
-
-
-
-
-
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-
-
-
-
-                try {
-                    Platform.runLater(
-                            () -> {
-                                setCurrentWork("4 z 4: rozklad chmury do mapy...");
+                                setCurrentWork("5 z 5: rozklad chmury do mapy...");
                             }
                     );
 
@@ -254,14 +308,21 @@ public class ExportService extends Service<Void> {
 
                     // Create a huge structure of glass that has an area of 100x100 blocks and is 50 blocks height.
                     // On top of the glass structure we have a layer of grass.
-                    Point3d SpawnPoint = points3dList.get(1);
-
-                    level.setSpawnPoint((int)SpawnPoint.x,(int)SpawnPoint.z+ 1, (int)SpawnPoint.y);
-                    for (int i = 0 ; i < points3dList.size();i++) {
-                        GenBlocks(points3dList.get(i),world);
+                    level.setSpawnPoint(0, (int) (minZ+100.0), 0);
+                    /* for (int x = 0; x < 400; x++) {
+                        for (int z = 0; z < 400; z++) {
+                            // Set glass
+                            for (int y = -63; y < -43; y++) {
+                                world.setBlock(x, y, z, SimpleBlock.GLASS);
+                            }
+                            // Set grass
+                            world.setBlock(x, -43, z, SimpleBlock.GLASS_PANE);
+                        }
+                    } */
+                    for (int i = 0; i < points3dList_v2.size(); i++) {
+                        Point3d point = points3dList_v2.get(i);
+                        world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
                     }
-
-
                     //  save the world
                     world.save();
 
@@ -282,6 +343,23 @@ public class ExportService extends Service<Void> {
         };
     }
 
+    public static class Sortbyroll implements Comparator<Point3d>
+    {
+        // Used for sorting in ascending order of
+        // roll number
+        public int compare(Point3d a, Point3d b)
+        {
+            int aX, bX, aY, bY;
+            aX = (int) a.x;
+            bX = (int) b.x;
+            aY = (int) a.y;
+            bY = (int) b.y;
+
+            if(aX != bX) return (int) (a.x - b.x);
+            else if(aY != bY) return (int) (a.y - b.y);
+            else return (int) (a.z - b.z);
+        }
+    }
 
     public Boolean getCurrentState() {
         return currentState;
@@ -336,22 +414,4 @@ public class ExportService extends Service<Void> {
     public void setMax(long max) {
         this.max = max;
     }
-
-
-    //klasa do generowania świata
-    public void GenBlocks(Point3d point,World world){
-        int x = (int)point.x;
-        int y = (int)point.y;
-        int z = (int)point.z;
-        int cat = (int)point.c;
-        switch (cat){
-            case 6:
-                world.setBlock(x, z, y, SimpleBlock.STONE);
-                break;
-            case 2:
-                world.setBlock(x,z,y,SimpleBlock.COAL_BLOCK);
-        }
-    }
 }
-
-

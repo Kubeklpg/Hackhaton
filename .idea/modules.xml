@@ -2,9 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AnsHackathonMaps.iml" filepath="$PROJECT_DIR$/.idea/modules/AnsHackathonMaps.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AnsHackathonMaps.main.iml" filepath="$PROJECT_DIR$/.idea/modules/AnsHackathonMaps.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AnsHackathonMaps.test.iml" filepath="$PROJECT_DIR$/.idea/modules/AnsHackathonMaps.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Hackhaton.iml" filepath="$PROJECT_DIR$/.idea/Hackhaton.iml" />
     </modules>
   </component>
