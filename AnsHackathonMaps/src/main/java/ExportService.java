@@ -348,12 +348,17 @@ public class ExportService extends Service<Void> {
                         if(point.z < min) min=point.z;
                         //world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
                     }
-
+                    /*
                     for(int i = pointsOfGround.size() - 1; i >= 0; i--){
                         Point3d point = pointsOfGround.get(i);
                         GenBlocks(point,world,arr);
                     }
 
+                     */
+                    for(int i = 0; i < pointsOfGround.size(); i++){
+                        Point3d point = pointsOfGround.get(i);
+                        GenBlocks(point,world,arr);
+                    }
 
                     world.save();
 
@@ -443,27 +448,34 @@ public class ExportService extends Service<Void> {
                 break;
             case 2:
 
-                int diff = arr[2][1]/40;
-                if(point.i > arr[2][0] && point.i < arr[2][0] +39* diff){
-                    world.setBlock(x,z,y*-1,SimpleBlock.COBBLESTONE);
-                    for(int i = 1; i < 3; i ++)
-                        world.setBlock(x,z-i,y*-1,SimpleBlock.COBBLESTONE);
 
-                }else {
-                    world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
-                    for(int i = 1; i < 3; i ++)
-                        world.setBlock(x,z-i,y*-1,SimpleBlock.DIRT);
+
+                int diff = arr[2][1]/4;
+
+                if(point.i > arr[2][0] && point.i < arr[2][0] + 1.85*diff) {
+                    world.setBlock(x, z, y * -1, SimpleBlock.COBBLESTONE);
+                    for(int j = 0; j < 2; j++){
+                        world.setBlock(x, (int) z - 1 - j, y * -1, SimpleBlock.COBBLESTONE);
+                    }
+                }else{
+                    world.setBlock(x, z, y * -1, SimpleBlock.GRASS);
+                    world.setBlock(x, z-1, y * -1, SimpleBlock.GRASS);
+
                 }
+
+
 
                 break;
             case 3:
                 world.setBlock(x,z,y*-1,SimpleBlock.SAPLING);
+                world.setBlock(x,z-1,y*-1,SimpleBlock.DIRT);
                 break;
             case 4:
                 world.setBlock(x,z,y*-1,SimpleBlock.LOG);
                 break;
             case 5:
                 world.setBlock(x,z,y*-1,SimpleBlock.LEAVES);
+                world.setBlock(x,z-1,y*-1,SimpleBlock.LOG);
                 break;
             case 6:
                 int differ = arr[6][1]/20;
@@ -493,6 +505,7 @@ public class ExportService extends Service<Void> {
 
 
         }
+
     }
 
     public int[][] Indentity(List<Point3d> points3dList){
@@ -504,8 +517,8 @@ public class ExportService extends Service<Void> {
         for(int i = 0 ; i < points3dList.size();i++) {
             Point3d point = points3dList.get(i);
             if(point.c == 2.0){
-                arr[2][0] = Math.min(arr[2][0],(int)point.i);
-                arr[2][1] = Math.max(arr[2][0],(int)point.i);
+                if(point.i < arr[2][0]) arr[2][0]=(int)point.i;
+                if(point.i > arr[2][1]) arr[2][1]=(int)point.i;
                 double leng = arr[2][1]-arr[2][0];
                 arr[2][1]= (int)leng;
             } else if (point.c == 6.0) {
