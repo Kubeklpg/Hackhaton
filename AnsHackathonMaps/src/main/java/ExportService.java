@@ -326,20 +326,22 @@ public class ExportService extends Service<Void> {
                     } */
                     double min=1000;
 
-                    int[][] arr = Indentity(points3dList);
-                    for (int i = 0; i < points3dList.size(); i++) {
-                        Point3d point = points3dList_v2.get(i);
-                        GenBlocks(point,world,arr);
-
-                        if(point.z < min) min=point.z;
-                        //world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
-                    }
                     for(int i = 0; i < pointOfBuilding.size(); i++){
                         Point3d point = pointOfBuilding.get(i);
                         for(int j = 0; j < 100; j++){
                             world.setBlock((int) point.x, (int) point.z - 1 - j , (int) point.y * -1, SimpleBlock.BRICK_BLOCK);
                         }
                     }
+
+                    int[][] arr = Indentity(points3dList);
+                    for (int i = 0; i < points3dList_v2.size(); i++) {
+                        Point3d point = points3dList_v2.get(i);
+                        GenBlocks(point,world,arr);
+
+                        if(point.z < min) min=point.z;
+                        //world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
+                    }
+
 
 
                     world.save();
