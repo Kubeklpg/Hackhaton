@@ -44,7 +44,7 @@ public class ExportService extends Service<Void> {
     private long pointsCount;
     private long pointsExportCount;
 
-    private List<Point3d> points3dList, points3dList_v2, pointOfBuilding;
+    private List<Point3d> points3dList, points3dList_v2, pointOfBuilding, pointsOfGround;
     private Map<String, String> dictionary;
     private List<Cube3d> cube3dList;
     private List<Cube3d> cube3dListNew;
@@ -148,6 +148,7 @@ public class ExportService extends Service<Void> {
                 points3dList = new ArrayList<Point3d>();
                 points3dList_v2 = new ArrayList<Point3d>();
                 pointOfBuilding = new ArrayList<Point3d>();
+                pointsOfGround = new ArrayList<Point3d>();
                 dictionary  = new HashMap<String, String>();
                 counter = 0;
                 currentState = true;
@@ -200,7 +201,6 @@ public class ExportService extends Service<Void> {
                                     minX = Math.min(minX, point3d.x);
                                     minY = Math.min(minY, point3d.y);
                                     minZ = Math.min(minZ, point3d.z);
-
                                     points3dList.add(point3d);
                                 }
 
@@ -232,6 +232,13 @@ public class ExportService extends Service<Void> {
                         points3dList.get(i).y = points3dList.get(i).y - minY;
                         points3dList.get(i).z = points3dList.get(i).z - minZ;
                     }
+
+                    for(int i = 0; i < points3dList.size(); i++){
+                        points3dList.get(i).x = points3dList.get(i).x * 2.5;
+                        points3dList.get(i).y = points3dList.get(i).y * 2.5;
+                        points3dList.get(i).z = points3dList.get(i).z * 2.5;
+                    }
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -244,6 +251,15 @@ public class ExportService extends Service<Void> {
                     );
                     Comparator<Point3d> comp = Comparator.comparing(Point3d::getDoubleX).thenComparingDouble(Point3d::getDoubleY).thenComparingDouble(Point3d::getDoubleZ);
                     Collections.sort(points3dList, comp);
+
+                    for(int i = 0; i < points3dList.size(); i++){
+                        if(points3dList.get(i).c == 2.0){
+                            pointsOfGround.add(points3dList.get(i));
+                        }
+                    }
+
+                    Comparator<Point3d> comp2 = Comparator.comparing(Point3d::getIntensity);
+                    Collections.sort(pointsOfGround, comp2);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -258,22 +274,21 @@ public class ExportService extends Service<Void> {
                     Point3d point = points3dList.get(0);
                     for(int i = 1; i < points3dList.size(); i++){
                         Point3d point2 = points3dList.get(i);
-                        if((int)point.x != (int)point2.x) {
-                            points3dList_v2.add(point);
-                            point = point2;
-                        }
-                        else if ((int)point.y != (int)point2.y ) {
-                            points3dList_v2.add(point);
-                            point = point2;
-                        }
-                        else if ((int)point.z != (int)point2.z) {
-                            points3dList_v2.add(point);
-                            point = point2;
-                        }
-                        else {
-                            point = point2;
-                        }
-
+                            if(point.x != point2.x) {
+                                points3dList_v2.add(point);
+                                point = point2;
+                            }
+                            else if (point.y != point2.y ) {
+                                points3dList_v2.add(point);
+                                point = point2;
+                            }
+                            else if (point.z != point2.z) {
+                                points3dList_v2.add(point);
+                                point = point2;
+                            }
+                            else {
+                                point = point2;
+                            }
                     }
 
                 } catch (Exception e) {
@@ -325,23 +340,19 @@ public class ExportService extends Service<Void> {
                         }
                     } */
                     double min=1000;
-
-                    for(int i = 0; i < pointOfBuilding.size(); i++){
-                        Point3d point = pointOfBuilding.get(i);
-                        for(int j = 0; j < 100; j++){
-                            world.setBlock((int) point.x, (int) point.z - 1 - j , (int) point.y * -1, SimpleBlock.BRICK_BLOCK);
-                        }
-                    }
-
                     int[][] arr = Indentity(points3dList);
+
                     for (int i = 0; i < points3dList_v2.size(); i++) {
                         Point3d point = points3dList_v2.get(i);
                         GenBlocks(point,world,arr);
-
                         if(point.z < min) min=point.z;
                         //world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
                     }
 
+                    for(int i = pointsOfGround.size() - 1; i >= 0; i--){
+                        Point3d point = pointsOfGround.get(i);
+                        GenBlocks(point,world,arr);
+                    }
 
 
                     world.save();
@@ -358,45 +369,8 @@ public class ExportService extends Service<Void> {
                 return null;
             }
 
-            public int[][] findMaxZ(List<Point3d> pointsList){
-                int[][] maxZ = new int[5000000][3];
-
-                Point3d point = pointsList.get(0);
-                maxZ[0][0] = (int) point.x;
-                maxZ[0][1] = (int) point.y;
-                maxZ[0][2] = (int) point.z;
-
-                for(int i = 1; i < pointsList.size(); i++){
-                    point = pointsList.get(i);
-                    for(int j = 0; j < pointsList.size(); j++){
-                        if((int) point.x == maxZ[j][0] && (int) point.y == maxZ[j][1]){
-                            maxZ[j][2] = Math.max(maxZ[j][2], (int) point.z);
-                        }
-                    }
-                }
-
-                return maxZ;
-            }
         };
 
-    }
-
-    public static class Sortbyroll implements Comparator<Point3d>
-    {
-        // Used for sorting in ascending order of
-        // roll number
-        public int compare(Point3d a, Point3d b)
-        {
-            int aX, bX, aY, bY;
-            aX = (int) a.x;
-            bX = (int) b.x;
-            aY = (int) a.y;
-            bY = (int) b.y;
-
-            if(aX != bX) return (int) (a.x - b.x);
-            else if(aY != bY) return (int) (a.y - b.y);
-            else return (int) (a.z - b.z);
-        }
     }
 
     public Boolean getCurrentState() {
@@ -454,21 +428,32 @@ public class ExportService extends Service<Void> {
     }
 
     public void GenBlocks(Point3d point,World world,int[][] arr){
+        point.x  = (double) Math.round(point.x);
         int x = (int)point.x;
+        point.y  = (double) Math.round(point.y);
         int y = (int)point.y;
+        point.z  = (double) Math.round(point.z);
         int z = (int)point.z;
 
         int cat = (int)point.c;
         switch (cat){
-
+            case 0:
+                for(int i = 0; i < 5; i ++)
+                world.setBlock(x,z-i,y*-1,SimpleBlock.COAL_BLOCK);
+                break;
             case 2:
 
                 int diff = arr[2][1]/40;
                 if(point.i > arr[2][0] && point.i < arr[2][0] +39* diff){
-
                     world.setBlock(x,z,y*-1,SimpleBlock.COBBLESTONE);
+                    for(int i = 1; i < 3; i ++)
+                        world.setBlock(x,z-i,y*-1,SimpleBlock.COBBLESTONE);
 
-                }else world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
+                }else {
+                    world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
+                    for(int i = 1; i < 3; i ++)
+                        world.setBlock(x,z-i,y*-1,SimpleBlock.DIRT);
+                }
 
                 break;
             case 3:
@@ -484,7 +469,19 @@ public class ExportService extends Service<Void> {
                 int differ = arr[6][1]/20;
                 if(point.i > arr[6][0] && point.i < arr[6][0] + 18*differ) {
                     world.setBlock(x, z, y * -1, SimpleBlock.BRICK_BLOCK);
-                }else world.setBlock(x, z, y * -1, SimpleBlock.STONE);
+                    for(int j = 0; j < 150; j++){
+                        world.setBlock(x, (int) z - 1 - j, y * -1, SimpleBlock.BRICK_BLOCK);
+                    }
+                }else{
+                    world.setBlock(x, z, y * -1, SimpleBlock.STONE);
+                    world.setBlock(x, z-1, y * -1, SimpleBlock.STONE);
+                    for(int j = 1; j < 150; j++){
+                        world.setBlock(x, (int) z - 1 - j, y * -1, SimpleBlock.BRICK_BLOCK);
+                    }
+                }
+                break;
+            case 7:
+                world.setBlock(x,z,y*-1,SimpleBlock.GLOWSTONE);
                 break;
                 /*
 

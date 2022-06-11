@@ -38,4 +38,7 @@ public class Point3d extends Vector3d {
     public static double getDoubleZ(Point3d p) {
         return p.z;
     }
+    public static double getIntensity(Point3d p) {
+        return p.i;
+    }
 }
