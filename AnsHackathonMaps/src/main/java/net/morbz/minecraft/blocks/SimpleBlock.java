@@ -85,6 +85,7 @@ public enum SimpleBlock implements IBlock {
 	EMERALD_BLOCK(Material.EMERALD_BLOCK),
 	REDSTONE_BLOCK(Material.REDSTONE_BLOCK),
 	QUARTZ_ORE(Material.QUARTZ_ORE),
+	QUARTZ_BLOCK(Material.QUARTZ_BLOCK),
 	SLIME_BLOCK(Material.SLIME_BLOCK),
 	BARRIER(Material.BARRIER),
 	SEA_LANTERN(Material.SEA_LANTERN),

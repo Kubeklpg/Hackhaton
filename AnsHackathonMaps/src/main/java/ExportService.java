@@ -1,9 +1,4 @@
-import java.io.*;
-import java.util.*;
-
 import ConvexHull.Point3d;
-import ConvexHull.ConvexHull3D;
-import Octree.AABB;
 import Octree.Cube3d;
 import Octree.Octree;
 import javafx.application.Platform;
@@ -11,18 +6,14 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point3D;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.*;
+import javafx.scene.Group;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.Scene;
 import javafx.scene.paint.Color;
-import javafx.scene.image.Image;
 import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.Box;
-import javafx.scene.shape.Shape3D;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Rotate;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import net.morbz.minecraft.blocks.DoorBlock;
 import net.morbz.minecraft.blocks.Material;
@@ -34,6 +25,12 @@ import net.morbz.minecraft.level.IGenerator;
 import net.morbz.minecraft.level.Level;
 import net.morbz.minecraft.world.DefaultLayers;
 import net.morbz.minecraft.world.World;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExportService extends Service<Void> {
 
@@ -253,6 +250,7 @@ public class ExportService extends Service<Void> {
                     IGenerator generator = new FlatGenerator(layers);
                     Level level = new Level("HackathonMap", generator);
                     level.setGameType(GameType.CREATIVE);
+                    level.setMapFeatures(false);
 
                     World world = new World(level, layers);
 
@@ -263,7 +261,7 @@ public class ExportService extends Service<Void> {
                         for (int z = 0; z < 400; z++) {
                             // Set glass
                             for (int y = -63; y < -43; y++) {
-                                world.setBlock(x, y, z, SimpleBlock.GLASS);
+                                world.setBlock(x, y, z, SimpleBlock.LOG);
                             }
                             // Set grass
                             world.setBlock(x, -43, z, SimpleBlock.GLASS_PANE);
