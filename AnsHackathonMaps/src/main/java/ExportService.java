@@ -334,7 +334,7 @@ public class ExportService extends Service<Void> {
                         if(point.z < min) min=point.z;
                         //world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
                     }
-                    System.out.println(arr[2][0] + " Min kategori 2 + "+arr[2][1]);
+
                    /*
                     for (int x = 0; x < 1000; x++) {
                         for (int z = 0; z < 1000; z++) {
@@ -448,16 +448,12 @@ public class ExportService extends Service<Void> {
 
             case 2:
 
-
                 int diff = arr[2][1]/40;
                 if(point.i > arr[2][0] && point.i < arr[2][0] +39* diff){
-                    if(point.g <170)
-                    {
-                        world.setBlock(x,z,y*-1,SimpleBlock.COBBLESTONE);
-                    }else world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
+
+                    world.setBlock(x,z,y*-1,SimpleBlock.COBBLESTONE);
 
                 }else world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
-
 
                 break;
             case 3:
@@ -470,7 +466,10 @@ public class ExportService extends Service<Void> {
                 world.setBlock(x,z,y*-1,SimpleBlock.LEAVES);
                 break;
             case 6:
-                world.setBlock(x, z, y*-1, SimpleBlock.STONE);
+                int differ = arr[6][1]/20;
+                if(point.i > arr[6][0] && point.i < arr[6][0] + 18*differ) {
+                    world.setBlock(x, z, y * -1, SimpleBlock.BRICK_BLOCK);
+                }else world.setBlock(x, z, y * -1, SimpleBlock.STONE);
                 break;
                 /*
 
