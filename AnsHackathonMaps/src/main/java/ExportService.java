@@ -44,7 +44,7 @@ public class ExportService extends Service<Void> {
     private long pointsCount;
     private long pointsExportCount;
 
-    private List<Point3d> points3dList, points3dList_v2, pointOfBuilding, pointsOfGround;
+    private List<Point3d> points3dList, points3dList_v2, pointOfBuilding, pointsOfGround, pointOfVegetation4;
     private Map<String, String> dictionary;
     private List<Cube3d> cube3dList;
     private List<Cube3d> cube3dListNew;
@@ -149,6 +149,7 @@ public class ExportService extends Service<Void> {
                 points3dList_v2 = new ArrayList<Point3d>();
                 pointOfBuilding = new ArrayList<Point3d>();
                 pointsOfGround = new ArrayList<Point3d>();
+                pointOfVegetation4 = new ArrayList<Point3d>();
                 dictionary  = new HashMap<String, String>();
                 counter = 0;
                 currentState = true;
@@ -251,15 +252,34 @@ public class ExportService extends Service<Void> {
                     );
                     Comparator<Point3d> comp = Comparator.comparing(Point3d::getDoubleX).thenComparingDouble(Point3d::getDoubleY).thenComparingDouble(Point3d::getDoubleZ);
                     Collections.sort(points3dList, comp);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
+                try {
+                    Platform.runLater(
+                            () -> {
+                                setCurrentWork("4 z 6: Tworzenie listy...");
+                            }
+                    );
+                    for(int i = 0; i < points3dList.size(); i++){
+                        Point3d point = points3dList.get(i);
+                        if(point.c == 6.0) pointOfBuilding.add(point);
+                    }
                     for(int i = 0; i < points3dList.size(); i++){
                         if(points3dList.get(i).c == 2.0){
                             pointsOfGround.add(points3dList.get(i));
                         }
                     }
+                    for(int i = 0; i < points3dList.size(); i++){
+                        if(points3dList.get(i).c == 4.0){
+                            pointOfVegetation4.add(points3dList.get(i));
+                        }
+                    }
 
                     Comparator<Point3d> comp2 = Comparator.comparing(Point3d::getIntensity);
                     Collections.sort(pointsOfGround, comp2);
+                    Collections.reverse(pointsOfGround);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -268,7 +288,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("4 z 6: Usuwanie duplikatow...");
+                                setCurrentWork("5 z 6: Usuwanie duplikatow...");
                             }
                     );
                     Point3d point = points3dList.get(0);
@@ -294,53 +314,33 @@ public class ExportService extends Service<Void> {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                try {
-                    Platform.runLater(
-                            () -> {
-                                setCurrentWork("5 z 6: Tworzenie listy budynkow...");
-                            }
-                    );
-                    for(int i = 0; i < points3dList_v2.size(); i++){
-                        Point3d point = points3dList_v2.get(i);
-                        if(point.c == 6.0) pointOfBuilding.add(point);
-                    }
-                    System.out.println(pointOfBuilding);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
 
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("5 z 6: Tworzenie mapy...");
+                                setCurrentWork("6 z 6: Tworzenie mapy...");
                             }
                     );
 
                     DefaultLayers layers = new DefaultLayers();
-                    layers.setLayer(-64, Material.BEDROCK);
                     IGenerator generator = new FlatGenerator(layers);
                     Level level = new Level("HackathonMap", generator);
                     level.setGameType(GameType.CREATIVE);
                     level.setMapFeatures(false);
-
                     World world = new World(level, layers);
+                    level.setSpawnPoint(100, (int) (minZ+100.0), -400);
 
-                    // Create a huge structure of glass that has an area of 100x100 blocks and is 50 blocks height.
-                    // On top of the glass structure we have a layer of grass.
-                    level.setSpawnPoint(0, (int) (minZ+100.0), 0);
-                    /* for (int x = 0; x < 400; x++) {
-                        for (int z = 0; z < 400; z++) {
-                            // Set glass
-                            for (int y = -63; y < -43; y++) {
-                                world.setBlock(x, y, z, SimpleBlock.GLASS);
-                            }
-                            // Set grass
-                            world.setBlock(x, -43, z, SimpleBlock.GLASS_PANE);
-                        }
-                    } */
                     double min=1000;
                     int[][] arr = Indentity(points3dList);
+                    for(int i = -100; i < points3dList_v2.get(points3dList_v2.size()-1).x+400; i++){
+                        for(int j = -100; j < points3dList_v2.get(points3dList_v2.size()-1).x+400; j++){
+                            world.setBlock(i, 0, j * -1, SimpleBlock.DIRT);
+                            world.setBlock(i, 3, j * -1, SimpleBlock.WATER);
+                            world.setBlock(i, 2, j * -1, SimpleBlock.WATER);
+                            world.setBlock(i, 1, j * -1, SimpleBlock.WATER);
+                        }
+                    }
 
                     for (int i = 0; i < points3dList_v2.size(); i++) {
                         Point3d point = points3dList_v2.get(i);
@@ -349,11 +349,10 @@ public class ExportService extends Service<Void> {
                         //world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
                     }
 
-                    for(int i = pointsOfGround.size() - 1; i >= 0; i--){
+                    for(int i = 0; i < pointsOfGround.size(); i++){
                         Point3d point = pointsOfGround.get(i);
                         GenBlocks(point,world,arr);
                     }
-
 
                     world.save();
 
@@ -431,7 +430,9 @@ public class ExportService extends Service<Void> {
         point.x  = (double) Math.round(point.x);
         int x = (int)point.x;
         point.y  = (double) Math.round(point.y);
-        int y = (int)point.y;
+        int y = (int) point.y;
+
+
         point.z  = (double) Math.round(point.z);
         int z = (int)point.z;
 
@@ -439,7 +440,7 @@ public class ExportService extends Service<Void> {
         switch (cat){
             case 0:
                 for(int i = 0; i < 5; i ++)
-                world.setBlock(x,z-i,y*-1,SimpleBlock.COAL_BLOCK);
+                    world.setBlock(x,z-i,y*-1,SimpleBlock.COAL_BLOCK);
                 break;
             case 2:
 
@@ -448,8 +449,11 @@ public class ExportService extends Service<Void> {
                     world.setBlock(x,z,y*-1,SimpleBlock.COBBLESTONE);
                     for(int i = 1; i < 3; i ++)
                         world.setBlock(x,z-i,y*-1,SimpleBlock.COBBLESTONE);
-
-                }else {
+                } else if(point.i > arr[2][0] && point.i < arr[2][0] +29* diff){
+                    world.setBlock(x,z,y*-1,SimpleBlock.COBBLESTONE);
+                    for(int i = 1; i < 3; i ++)
+                        world.setBlock(x,z-i,y*-1,SimpleBlock.COBBLESTONE);
+                } else {
                     world.setBlock(x,z,y*-1,SimpleBlock.GRASS);
                     for(int i = 1; i < 3; i ++)
                         world.setBlock(x,z-i,y*-1,SimpleBlock.DIRT);
@@ -458,12 +462,16 @@ public class ExportService extends Service<Void> {
                 break;
             case 3:
                 world.setBlock(x,z,y*-1,SimpleBlock.SAPLING);
+                world.setBlock(x,z-1,y*-1,SimpleBlock.DIRT);
                 break;
             case 4:
-                world.setBlock(x,z,y*-1,SimpleBlock.LOG);
+                for(int i = 0; i < 10; i++){
+                    world.setBlock(x,z-i,y*-1,SimpleBlock.LOG);
+                }
                 break;
             case 5:
                 world.setBlock(x,z,y*-1,SimpleBlock.LEAVES);
+                for(int i = -1; i < 2; i ++) world.setBlock(x+i,z+i,i+y*-1,SimpleBlock.LEAVES);
                 break;
             case 6:
                 int differ = arr[6][1]/20;
