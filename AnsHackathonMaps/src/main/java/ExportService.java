@@ -44,8 +44,7 @@ public class ExportService extends Service<Void> {
     private long pointsCount;
     private long pointsExportCount;
 
-    private List<Point3d> points3dList;
-    private List<Point3d> points3dList_v2;
+    private List<Point3d> points3dList, points3dList_v2, pointOfBuilding;
     private Map<String, String> dictionary;
     private List<Cube3d> cube3dList;
     private List<Cube3d> cube3dListNew;
@@ -148,6 +147,7 @@ public class ExportService extends Service<Void> {
 
                 points3dList = new ArrayList<Point3d>();
                 points3dList_v2 = new ArrayList<Point3d>();
+                pointOfBuilding = new ArrayList<Point3d>();
                 dictionary  = new HashMap<String, String>();
                 counter = 0;
                 currentState = true;
@@ -166,7 +166,7 @@ public class ExportService extends Service<Void> {
 
                         Platform.runLater(
                                 () -> {
-                                    setCurrentWork("1 z 5: Dekodowanie plikow...");
+                                    setCurrentWork("1 z 6: Dekodowanie plikow...");
                                 }
                         );
 
@@ -222,7 +222,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("2 z 5: Normalizacja danych...");
+                                setCurrentWork("2 z 6: Normalizacja danych...");
                             }
                     );
 
@@ -239,7 +239,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("3 z 5: Sortowanie danych...");
+                                setCurrentWork("3 z 6: Sortowanie danych...");
                             }
                     );
                     Comparator<Point3d> comp = Comparator.comparing(Point3d::getDoubleX).thenComparingDouble(Point3d::getDoubleY).thenComparingDouble(Point3d::getDoubleZ);
@@ -252,7 +252,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("4 z 5: Grupowanie danych...");
+                                setCurrentWork("4 z 6: Usuwanie duplikatow...");
                             }
                     );
                     Point3d point = points3dList.get(0);
@@ -275,8 +275,21 @@ public class ExportService extends Service<Void> {
                         }
 
                     }
-                    System.out.println(points3dList_v2.size());
 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    Platform.runLater(
+                            () -> {
+                                setCurrentWork("5 z 6: Tworzenie listy budynkow...");
+                            }
+                    );
+                    for(int i = 0; i < points3dList_v2.size(); i++){
+                        Point3d point = points3dList_v2.get(i);
+                        if(point.c == 6.0) pointOfBuilding.add(point);
+                    }
+                    System.out.println(pointOfBuilding);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -285,7 +298,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("5 z 5: rozklad chmury do mapy...");
+                                setCurrentWork("5 z 6: Tworzenie mapy...");
                             }
                     );
 
@@ -321,7 +334,14 @@ public class ExportService extends Service<Void> {
                         if(point.z < min) min=point.z;
                         //world.setBlock((int) point.x, (int) point.z, (int) point.y * -1, SimpleBlock.GRASS);
                     }
-                    //  save the world
+                    for(int i = 0; i < pointOfBuilding.size(); i++){
+                        Point3d point = pointOfBuilding.get(i);
+                        for(int j = 0; j < 100; j++){
+                            world.setBlock((int) point.x, (int) point.z - 1 - j , (int) point.y * -1, SimpleBlock.BRICK_BLOCK);
+                        }
+                    }
+
+
                     world.save();
 
                 } catch (Throwable e) {
@@ -336,9 +356,27 @@ public class ExportService extends Service<Void> {
                 return null;
             }
 
+            public int[][] findMaxZ(List<Point3d> pointsList){
+                int[][] maxZ = new int[5000000][3];
 
+                Point3d point = pointsList.get(0);
+                maxZ[0][0] = (int) point.x;
+                maxZ[0][1] = (int) point.y;
+                maxZ[0][2] = (int) point.z;
 
+                for(int i = 1; i < pointsList.size(); i++){
+                    point = pointsList.get(i);
+                    for(int j = 0; j < pointsList.size(); j++){
+                        if((int) point.x == maxZ[j][0] && (int) point.y == maxZ[j][1]){
+                            maxZ[j][2] = Math.max(maxZ[j][2], (int) point.z);
+                        }
+                    }
+                }
+
+                return maxZ;
+            }
         };
+
     }
 
     public static class Sortbyroll implements Comparator<Point3d>
