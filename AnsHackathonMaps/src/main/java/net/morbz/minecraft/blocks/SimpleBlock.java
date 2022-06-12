@@ -31,13 +31,17 @@ package net.morbz.minecraft.blocks;
  */
 @SuppressWarnings("javadoc")
 public enum SimpleBlock implements IBlock {
+	WOOL(Material.WOOL),
 	AIR(Material.AIR),
 	LOG(Material.LOG),
 	LEAVES(Material.LEAVES),
 	SAPLING(Material.SAPLING),
 	GRASS(Material.GRASS),
 	STONE(Material.STONE),
+	SAND(Material.SAND),
+	REDSANDSTONE(Material.RED_SANDSTONE),
 	COBBLESTONE(Material.COBBLESTONE),
+	SANDSTONE(Material.SANDSTONE),
 	BEDROCK(Material.BEDROCK),
 	WATER(Material.WATER),
 	LAVA(Material.LAVA),

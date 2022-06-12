@@ -25,10 +25,7 @@ import javafx.scene.transform.Affine;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import net.morbz.minecraft.blocks.DoorBlock;
-import net.morbz.minecraft.blocks.Material;
-import net.morbz.minecraft.blocks.RailBlock;
-import net.morbz.minecraft.blocks.SimpleBlock;
+import net.morbz.minecraft.blocks.*;
 import net.morbz.minecraft.blocks.states.Facing4State;
 import net.morbz.minecraft.level.FlatGenerator;
 import net.morbz.minecraft.level.GameType;
@@ -45,8 +42,7 @@ public class ExportService extends Service<Void> {
     private long pointsCount;
     private long pointsExportCount;
 
-    private List<Point3d> points3dList, points3dList_v2, pointOfBuilding, pointsOfGround, pointOfVegetation4, pointsOfClass, pointsOfVege;
-
+    private List<Point3d> points3dList, points3dList_v2, pointOfBuilding, pointsOfGround, pointOfVegetation4, pointsOfTrees,pointsOfClass;
     private Map<String, String> dictionary;
     private List<Cube3d> cube3dList;
     private List<Cube3d> cube3dListNew;
@@ -151,16 +147,16 @@ public class ExportService extends Service<Void> {
                 points3dList_v2 = new ArrayList<Point3d>();
                 pointOfBuilding = new ArrayList<Point3d>();
                 pointsOfGround = new ArrayList<Point3d>();
-                pointsOfClass = new ArrayList<Point3d>();
-                pointsOfVege = new ArrayList<Point3d>();
                 pointOfVegetation4 = new ArrayList<Point3d>();
+                pointsOfClass= new ArrayList<Point3d>();
+                pointsOfTrees = new ArrayList<Point3d>();
                 dictionary  = new HashMap<String, String>();
                 counter = 0;
                 currentState = true;
 
                 // ilosc operacji do progressu
                 max = pointsCount;
-                double minX = 0, minY = 0, minZ = 0;
+                double minX = 0, minY = 0, minZ = 0, maxX = 0, maxY = 0;
                 boolean isMin = false;
 
                 try {
@@ -201,11 +197,15 @@ public class ExportService extends Service<Void> {
                                         minX = point3d.x;
                                         minY = point3d.y;
                                         minZ = point3d.z;
+                                        maxX = point3d.x;
+                                        maxY = point3d.y;
                                         isMin = true;
                                     }
                                     minX = Math.min(minX, point3d.x);
                                     minY = Math.min(minY, point3d.y);
                                     minZ = Math.min(minZ, point3d.z);
+                                    maxX = Math.max(maxX, point3d.x);
+                                    maxY = Math.max(maxY, point3d.y);
                                     points3dList.add(point3d);
                                 }
 
@@ -218,7 +218,7 @@ public class ExportService extends Service<Void> {
                         }
 
                     }
-                    System.out.println("Prawidlowych pkt: " + points3dList.size());
+                    //System.out.println("Prawidlowych pkt: " + points3dList.size());
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -227,10 +227,9 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("2 z 6: Normalizacja danych...");
+                                setCurrentWork("2 z 7: Normalizacja danych...");
                             }
                     );
-
                     for(int i = 0; i < points3dList.size(); i++)
                     {
                         points3dList.get(i).x = points3dList.get(i).x - minX;
@@ -251,7 +250,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("3 z 6: Sortowanie danych...");
+                                setCurrentWork("3 z 7: Sortowanie danych...");
                             }
                     );
                     Comparator<Point3d> comp = Comparator.comparing(Point3d::getDoubleX).thenComparingDouble(Point3d::getDoubleY).thenComparingDouble(Point3d::getDoubleZ);
@@ -263,7 +262,7 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("4 z 6: Tworzenie listy...");
+                                setCurrentWork("4 z 7: Tworzenie list...");
                             }
                     );
                     for(int i = 0; i < points3dList.size(); i++){
@@ -276,20 +275,11 @@ public class ExportService extends Service<Void> {
                         }
                     }
                     for(int i = 0; i < points3dList.size(); i++){
-                        if(points3dList.get(i).c == 4.0){
+                        if(points3dList.get(i).c == 5.0){
                             pointOfVegetation4.add(points3dList.get(i));
                         }
                     }
-                    for(int i = 0; i < points3dList.size(); i++){
-                        if(points3dList.get(i).c == 0.0){
-                            pointsOfClass.add(points3dList.get(i));
-                        }
-                    }
-                    for(int i = 0; i < points3dList.size(); i++){
-                        if(points3dList.get(i).c == 0.0){
-                            pointsOfVege.add(points3dList.get(i));
-                        }
-                    }
+
                     Comparator<Point3d> comp2 = Comparator.comparing(Point3d::getIntensity);
                     Collections.sort(pointsOfGround, comp2);
                     Collections.reverse(pointsOfGround);
@@ -301,12 +291,13 @@ public class ExportService extends Service<Void> {
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("5 z 6: Usuwanie duplikatow...");
+                                setCurrentWork("5 z 7: Usuwanie duplikatow...");
                             }
                     );
                     Point3d point = points3dList.get(0);
-                    for(int i = 1; i < points3dList.size(); i++){
+                    for(int i = 0; i < points3dList.size(); i++){
                         Point3d point2 = points3dList.get(i);
+                        if(point.c != 2.0 || point.c != 6.0)
                             if(point.x != point2.x) {
                                 points3dList_v2.add(point);
                                 point = point2;
@@ -322,17 +313,92 @@ public class ExportService extends Service<Void> {
                             else {
                                 point = point2;
                             }
+                        else point = point2;
                     }
 
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
+                List<Point3d> list1 = new ArrayList<Point3d>();
+                List<Point3d> list2 = new ArrayList<Point3d>();
+                List<Point3d> list3 = new ArrayList<Point3d>();
+                List<Point3d> list4 = new ArrayList<Point3d>();
 
                 try {
                     Platform.runLater(
                             () -> {
-                                setCurrentWork("6 z 6: Tworzenie mapy...");
+                                setCurrentWork("6 z 7: Tworzenie drzew...");
+                            }
+                    );
+                    System.out.println("Size of vegetation: "+pointOfVegetation4.size());
+                    for(int i = 0; i < pointOfVegetation4.size(); i++){
+                        Point3d point = pointOfVegetation4.get(i);
+                        if(point.x < maxX/2 && point.y < maxY/2){
+                            list1.add(point);
+                        } else if(point.x >= maxX/2 && point.y < maxY/2){
+                            list2.add(point);
+                        } else if(point.x < maxX/2 && point.y >= maxY/2){
+                            list3.add(point);;
+                        } else {
+                            list4.add(point);
+                        }
+                    }
+                    System.out.println("Size of lists: "+(list1.size()+list2.size()+list3.size()+list4.size()));
+                    System.out.println("Size of list1: "+list1.size());
+                    System.out.println("Size of list2: "+list2.size());
+                    System.out.println("Size of list3: "+list3.size());
+                    System.out.println("Size of list4: "+list4.size());
+
+                    for(int i = 0; i < list1.size(); i++){
+                        Point3d pointA = list1.get(i);
+                        int pointsAround = 0;
+                        List<Point3d> temp = new ArrayList<Point3d>();
+                        for(int j = 0; j < list1.size(); j++){
+                            double odl = 0;
+                            Point3d pointB = list1.get(i);
+                            odl = Math.sqrt(Math.pow(pointA.x-pointB.x,2)+Math.pow(pointA.y-pointB.y,2));
+                            if(odl < 7){
+                                pointsAround++;
+                                temp.add(pointB);
+                            }
+                            if(pointsAround > 6000) {
+                                for(int k = 0; k < temp.size(); k++){
+                                    list1.remove(temp.get(k));
+                                }
+                                pointsOfTrees.add(pointA);
+                                break;
+                            }
+                        }
+                        if(pointsAround > 4000) {
+                            for(int k = 0; k < temp.size(); k++){
+                                list1.remove(temp.get(k));
+                            }
+                            if(!pointsOfTrees.contains(pointA)) pointsOfTrees.add(pointA);
+                        }
+                    }
+
+
+
+
+
+                    //pointOfVegetation4
+
+                    /* System.out.println(pointOfVegetation4.size());
+                    for(int i = 0; i < pointOfVegetation4.size(); i++){
+
+                    } */
+
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    Platform.runLater(
+                            () -> {
+                                setCurrentWork("7 z 7: Tworzenie mapy...");
                             }
                     );
 
@@ -340,9 +406,10 @@ public class ExportService extends Service<Void> {
                     IGenerator generator = new FlatGenerator(layers);
                     Level level = new Level("HackathonMap", generator);
                     level.setGameType(GameType.CREATIVE);
+                    level.setAllowCommands(true);
                     level.setMapFeatures(false);
                     World world = new World(level, layers);
-                    level.setSpawnPoint(100, (int) (minZ+100.0), -400);
+                    level.setSpawnPoint(1000, (int) (minZ+100.0), -700);
 
                     double min=1000;
                     int[][] arr = Indentity(points3dList);
@@ -354,7 +421,6 @@ public class ExportService extends Service<Void> {
                             world.setBlock(i, 1, j * -1, SimpleBlock.WATER);
                         }
                     }
-
 
                     for (int i = 0; i < points3dList_v2.size(); i++) {
                         Point3d point = points3dList_v2.get(i);
@@ -368,7 +434,15 @@ public class ExportService extends Service<Void> {
                         GenBlocks(point,world,arr);
                     }
 
-                    System.out.println(pointsOfClass.size());
+                    for(int i = 0; i < pointOfBuilding.size(); i++){
+                        Point3d point = pointOfBuilding.get(i);
+                        GenBlocks(point,world,arr);
+                    }
+
+                    for(int i = 0; i < pointsOfTrees.size(); i++){
+                        Point3d point = pointsOfTrees.get(i);
+                        GenTree(point,world);
+                    }
                     for(int i = 0; i < pointsOfClass.size(); i++){
 
                         Point3d point = pointsOfClass.get(i);
@@ -382,18 +456,16 @@ public class ExportService extends Service<Void> {
 
                                 if(Math.sqrt(Math.pow((int)point.x-(int)point2.x,2)+(Math.pow((int)point.x-(int)point2.x,2)))<2)
                                 {
-                              //      System.out.println("glglg");
+                                    //      System.out.println("glglg");
                                     System.out.println(point.x);
                                     System.out.println(point.y);
-                              //      System.out.println(point.c);
+                                    //      System.out.println(point.c);
                                     world.setBlock((int)point.x,(int)point.z,-(int)point.y, SimpleBlock.GLOWSTONE);
                                 }
                             }
                         }
                         //GenBlocks(point,world,arr);
                     }
-
-                    System.out.println(pointsOfVege.size());
                     world.save();
 
                 } catch (Throwable e) {
@@ -466,13 +538,23 @@ public class ExportService extends Service<Void> {
         this.max = max;
     }
 
+    public void GenTree(Point3d point, World world){
+        point.x  = (double) Math.round(point.x);
+        int x = (int)point.x;
+        point.y  = (double) Math.round(point.y);
+        int y = (int) point.y;
+        point.z  = (double) Math.round(point.z);
+        int z = (int)point.z;
+        System.out.println("x:"+x+"y"+y+"z"+z);
+        for(int i = 0; i < 50; i++){
+            world.setBlock(x,z-i,y*-1,SimpleBlock.REDSTONE_BLOCK);
+        }
+    }
     public void GenBlocks(Point3d point,World world,int[][] arr){
         point.x  = (double) Math.round(point.x);
         int x = (int)point.x;
         point.y  = (double) Math.round(point.y);
         int y = (int) point.y;
-
-
         point.z  = (double) Math.round(point.z);
         int z = (int)point.z;
 
@@ -481,38 +563,51 @@ public class ExportService extends Service<Void> {
             case 0:
                 for(int i = 0; i < 5; i ++)
                     world.setBlock(x,z-i,y*-1,SimpleBlock.COAL_BLOCK);
-
                 break;
             case 2:
-
-
-
                 int diff = arr[2][1]/4;
 
-                if(point.i > arr[2][0] && point.i < arr[2][0] + 1.85*diff) {
-                    world.setBlock(x, z, y * -1, SimpleBlock.COBBLESTONE);
-                    for(int j = 0; j < 2; j++){
-                        world.setBlock(x, (int) z - 1 - j, y * -1, SimpleBlock.COBBLESTONE);
+                if(point.i > arr[2][0] && point.i < arr[2][0] + 1.80*diff){
+                    world.setBlock(x, z, y * -1,SimpleBlock.SAND);
+                    for(int j = 0; j < 7; j++){
+                        world.setBlock(x, (int) z - j, y * -1, SimpleBlock.COBBLESTONE);
                     }
-                }else{
+                }else if(point.i > arr[2][0] && point.i < arr[2][0] + 1.83*diff) {
+                    world.setBlock(x, z, y * -1, SimpleBlock.COBBLESTONE);
+                    for(int i = -1; i < 2; i ++) world.setBlock(x+i,z,i+y*-1,SimpleBlock.COBBLESTONE);
+                    for(int j = 0; j < 7; j++){
+                        world.setBlock(x, (int) z - j, y * -1, SimpleBlock.COBBLESTONE);
+                    }
+                } else if(point.i > arr[2][0] && point.i < arr[2][0] + 1.85*diff) {
+                    world.setBlock(x, z, y * -1, SimpleBlock.GRAVEL);
+                    //world.setBlock(x, z, y * -1,SimpleBlock.SAND);
+                    for(int i = -1; i < 2; i ++) world.setBlock(x+i,z,i+y*-1,SimpleBlock.GRAVEL);/*world.setBlock(x+i,z,i+y*-1,SimpleBlock.SAND);*/
+                    for(int j = 0; j < 7; j++){
+                        world.setBlock(x, (int) z - j, y * -1, SimpleBlock.COBBLESTONE);
+                    }
+                } else{
                     world.setBlock(x, z, y * -1, SimpleBlock.GRASS);
                     world.setBlock(x, z-1, y * -1, SimpleBlock.GRASS);
-
+                    for(int i = -1; i < 2; i ++) world.setBlock(x+i,z,i+y*-1,SimpleBlock.GRASS);
+                    for(int j = 0; j < 7; j++){
+                        world.setBlock(x, (int) z - j, y * -1, SimpleBlock.GRASS);
+                    }
                 }
-
                 break;
             case 3:
-                world.setBlock(x,z,y*-1,SimpleBlock.SAPLING);
+                world.setBlock(x,z,y*-1,SimpleBlock.YELLOW_FLOWER);
                 world.setBlock(x,z-1,y*-1,SimpleBlock.DIRT);
                 break;
             case 4:
+                world.setBlock(x,z+1,y*-1,new StainedBlock(StainedBlock.StainedMaterial.WOOL, StainedBlock.StainedColor.GREEN));
                 for(int i = 0; i < 10; i++){
                     world.setBlock(x,z-i,y*-1,SimpleBlock.LOG);
                 }
                 break;
             case 5:
-                world.setBlock(x,z,y*-1,SimpleBlock.LEAVES);
-                for(int i = -1; i < 2; i ++) world.setBlock(x+i,z+i,i+y*-1,SimpleBlock.LEAVES);
+                world.setBlock(x,z,y*-1,new StainedBlock(StainedBlock.StainedMaterial.WOOL, StainedBlock.StainedColor.GREEN));
+                for(int i = -1; i < 2; i ++) world.setBlock(x+i,z+i,i+y*-1,new StainedBlock(StainedBlock.StainedMaterial.WOOL, StainedBlock.StainedColor.GREEN));
+
                 break;
             case 6:
                 int differ = arr[6][1]/20;
