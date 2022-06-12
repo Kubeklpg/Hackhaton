@@ -586,21 +586,8 @@ public class ExportService extends Service<Void> {
             case 2:
                 int diff = arr[2][1]/4;
 
-                if(point.i > arr[2][0] && point.i < arr[2][0] + 1.80*diff){
+                if(point.i > arr[2][0] && point.i < arr[2][0] + 1.85*diff){
                     world.setBlock(x, z, y * -1,SimpleBlock.SAND);
-                    for(int j = 0; j < 7; j++){
-                        world.setBlock(x, (int) z - j, y * -1, SimpleBlock.COBBLESTONE);
-                    }
-                }else if(point.i > arr[2][0] && point.i < arr[2][0] + 1.83*diff) {
-                    world.setBlock(x, z, y * -1, SimpleBlock.COBBLESTONE);
-                    for(int i = -1; i < 2; i ++) world.setBlock(x+i,z,i+y*-1,SimpleBlock.COBBLESTONE);
-                    for(int j = 0; j < 7; j++){
-                        world.setBlock(x, (int) z - j, y * -1, SimpleBlock.COBBLESTONE);
-                    }
-                } else if(point.i > arr[2][0] && point.i < arr[2][0] + 1.85*diff) {
-                    world.setBlock(x, z, y * -1, SimpleBlock.GRAVEL);
-                    //world.setBlock(x, z, y * -1,SimpleBlock.SAND);
-                    for(int i = -1; i < 2; i ++) world.setBlock(x+i,z,i+y*-1,SimpleBlock.GRAVEL);/*world.setBlock(x+i,z,i+y*-1,SimpleBlock.SAND);*/
                     for(int j = 0; j < 7; j++){
                         world.setBlock(x, (int) z - j, y * -1, SimpleBlock.COBBLESTONE);
                     }
