@@ -216,6 +216,8 @@ public class ExportService extends Service<Void> {
                             counter++;
                             updateProgress(counter, max);
                         }
+                        maxX-=minX;
+                        maxY-=minY;
 
                     }
                     //System.out.println("Prawidlowych pkt: " + points3dList.size());
@@ -334,11 +336,16 @@ public class ExportService extends Service<Void> {
                     System.out.println("Size of vegetation: "+pointOfVegetation4.size());
                     for(int i = 0; i < pointOfVegetation4.size(); i++){
                         Point3d point = pointOfVegetation4.get(i);
+                        //System.out.println(point.x);
+                        //System.out.println(maxX);
                         if(point.x < maxX/2 && point.y < maxY/2){
+                            //System.out.println("1");
                             list1.add(point);
                         } else if(point.x >= maxX/2 && point.y < maxY/2){
+                            //System.out.println("2");
                             list2.add(point);
                         } else if(point.x < maxX/2 && point.y >= maxY/2){
+                            //System.out.println("3");
                             list3.add(point);;
                         } else {
                             list4.add(point);
@@ -350,6 +357,7 @@ public class ExportService extends Service<Void> {
                     System.out.println("Size of list3: "+list3.size());
                     System.out.println("Size of list4: "+list4.size());
 
+                    /*
                     for(int i = 0; i < list1.size(); i++){
                         Point3d pointA = list1.get(i);
                         int pointsAround = 0;
@@ -377,7 +385,7 @@ public class ExportService extends Service<Void> {
                             if(!pointsOfTrees.contains(pointA)) pointsOfTrees.add(pointA);
                         }
                     }
-
+                    */
 
 
 
