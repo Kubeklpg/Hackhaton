@@ -282,6 +282,12 @@ public class ExportService extends Service<Void> {
                         }
                     }
 
+                    for(int i = 0; i < points3dList.size(); i++){
+                        if(points3dList.get(i).c == 0.0){
+                            pointsOfClass.add(points3dList.get(i));
+                        }
+                    }
+
                     Comparator<Point3d> comp2 = Comparator.comparing(Point3d::getIntensity);
                     Collections.sort(pointsOfGround, comp2);
                     Collections.reverse(pointsOfGround);
@@ -357,7 +363,7 @@ public class ExportService extends Service<Void> {
                     System.out.println("Size of list3: "+list3.size());
                     System.out.println("Size of list4: "+list4.size());
 
-                    /*
+
                     for(int i = 0; i < list1.size(); i++){
                         Point3d pointA = list1.get(i);
                         int pointsAround = 0;
@@ -366,11 +372,11 @@ public class ExportService extends Service<Void> {
                             double odl = 0;
                             Point3d pointB = list1.get(i);
                             odl = Math.sqrt(Math.pow(pointA.x-pointB.x,2)+Math.pow(pointA.y-pointB.y,2));
-                            if(odl < 7){
+                            if(odl < 5){
                                 pointsAround++;
                                 temp.add(pointB);
                             }
-                            if(pointsAround > 6000) {
+                            if(pointsAround > 52000) {
                                 for(int k = 0; k < temp.size(); k++){
                                     list1.remove(temp.get(k));
                                 }
@@ -385,7 +391,7 @@ public class ExportService extends Service<Void> {
                             if(!pointsOfTrees.contains(pointA)) pointsOfTrees.add(pointA);
                         }
                     }
-                    */
+
 
 
 
@@ -417,7 +423,7 @@ public class ExportService extends Service<Void> {
                     level.setAllowCommands(true);
                     level.setMapFeatures(false);
                     World world = new World(level, layers);
-                    level.setSpawnPoint(1000, (int) (minZ+100.0), -700);
+                    level.setSpawnPoint(10, (int) (minZ+100.0), -700);
 
                     double min=1000;
                     int[][] arr = Indentity(points3dList);
@@ -546,16 +552,21 @@ public class ExportService extends Service<Void> {
         this.max = max;
     }
 
-    public void GenTree(Point3d point, World world){
-        point.x  = (double) Math.round(point.x);
-        int x = (int)point.x;
-        point.y  = (double) Math.round(point.y);
+    public void GenTree(Point3d point, World world) {
+        point.x = (double) Math.round(point.x);
+        int x = (int) point.x;
+        point.y = (double) Math.round(point.y);
         int y = (int) point.y;
-        point.z  = (double) Math.round(point.z);
-        int z = (int)point.z;
-        System.out.println("x:"+x+"y"+y+"z"+z);
-        for(int i = 0; i < 50; i++){
-            world.setBlock(x,z-i,y*-1,SimpleBlock.REDSTONE_BLOCK);
+        point.z = (double) Math.round(point.z);
+        int z = (int) point.z;
+        System.out.println("x:" + x + "y" + y + "z" + z);
+        double rand = Math.random();
+        if (rand > 0.98) {
+            for (int i = 0; i < 50; i++) {
+
+
+                world.setBlock(x, z - i, y * -1, SimpleBlock.LOG);
+            }
         }
     }
     public void GenBlocks(Point3d point,World world,int[][] arr){
@@ -603,7 +614,9 @@ public class ExportService extends Service<Void> {
                 }
                 break;
             case 3:
-                world.setBlock(x,z,y*-1,SimpleBlock.YELLOW_FLOWER);
+                //world.setBlock(x,z+1,y*-1,SimpleBlock.YELLOW_FLOWER);
+                world.setBlock(x,z,y*-1,SimpleBlock.TALLGRASS);
+
                 world.setBlock(x,z-1,y*-1,SimpleBlock.DIRT);
                 break;
             case 4:

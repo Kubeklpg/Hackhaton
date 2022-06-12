@@ -32,6 +32,7 @@ package net.morbz.minecraft.blocks;
 @SuppressWarnings("javadoc")
 public enum SimpleBlock implements IBlock {
 	WOOL(Material.WOOL),
+	TALLGRASS(Material.TALLGRASS),
 	AIR(Material.AIR),
 	LOG(Material.LOG),
 	LEAVES(Material.LEAVES),
