@@ -305,7 +305,7 @@ public class ExportService extends Service<Void> {
                     Point3d point = points3dList.get(0);
                     for(int i = 0; i < points3dList.size(); i++){
                         Point3d point2 = points3dList.get(i);
-                        if(point.c != 2.0 || point.c != 6.0)
+                        if(point.c != 2.0 && point.c != 6.0)
                             if(point.x != point2.x) {
                                 points3dList_v2.add(point);
                                 point = point2;
@@ -471,8 +471,8 @@ public class ExportService extends Service<Void> {
                                 if(Math.sqrt(Math.pow((int)point.x-(int)point2.x,2)+(Math.pow((int)point.x-(int)point2.x,2)))<2)
                                 {
                                     //      System.out.println("glglg");
-                                    System.out.println(point.x);
-                                    System.out.println(point.y);
+                                    //System.out.println(point.x);
+                                    //System.out.println(point.y);
                                     //      System.out.println(point.c);
                                     world.setBlock((int)point.x,(int)point.z,-(int)point.y, SimpleBlock.GLOWSTONE);
                                 }
@@ -614,8 +614,8 @@ public class ExportService extends Service<Void> {
                 }
                 break;
             case 3:
-                //world.setBlock(x,z+1,y*-1,SimpleBlock.YELLOW_FLOWER);
-                world.setBlock(x,z,y*-1,SimpleBlock.TALLGRASS);
+                world.setBlock(x,z,y*-1,SimpleBlock.YELLOW_FLOWER);
+                //world.setBlock(x,z,y*-1,SimpleBlock.TALLGRASS);
 
                 world.setBlock(x,z-1,y*-1,SimpleBlock.DIRT);
                 break;
